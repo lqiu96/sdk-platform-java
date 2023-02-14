@@ -31,7 +31,6 @@ package com.google.api.gax.httpjson.longrunning.stub;
 
 import com.google.api.gax.core.BackgroundResource;
 import com.google.api.gax.httpjson.longrunning.OperationsClient.ListOperationsPagedResponse;
-import com.google.api.gax.rpc.LongRunningClient;
 import com.google.api.gax.rpc.UnaryCallable;
 import com.google.longrunning.CancelOperationRequest;
 import com.google.longrunning.DeleteOperationRequest;
@@ -68,10 +67,6 @@ public abstract class OperationsStub implements BackgroundResource {
 
   public UnaryCallable<CancelOperationRequest, Empty> cancelOperationCallable() {
     throw new UnsupportedOperationException("Not implemented: cancelOperationCallable()");
-  }
-
-  public LongRunningClient longRunningClient() {
-    throw new UnsupportedOperationException("Not implemented: longRunningClient()");
   }
 
   @Override

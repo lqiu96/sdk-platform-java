@@ -32,6 +32,7 @@ package com.google.api.gax.httpjson;
 import com.google.api.gax.core.BackgroundResource;
 import com.google.api.gax.rpc.BatchingCallSettings;
 import com.google.api.gax.rpc.ClientContext;
+import com.google.api.gax.rpc.LongRunningClient;
 import com.google.api.gax.rpc.OperationCallSettings;
 import com.google.api.gax.rpc.OperationCallable;
 import com.google.api.gax.rpc.PagedCallSettings;
@@ -105,6 +106,24 @@ public interface HttpJsonStubCallableFactory<
           OperationCallSettings<RequestT, ResponseT, MetadataT> operationCallSettings,
           ClientContext clientContext,
           OperationsStub operationsStub);
+
+  /**
+   * Creates a callable object that represents a long-running operation. Designed for use by
+   * generated code.
+   *
+   * @param httpJsonCallSettings the http/json call settings
+   * @param operationCallSettings {@link OperationCallSettings} to configure the method-level
+   *     settings with
+   * @param clientContext {@link ClientContext} to use to connect to the service
+   * @param longRunningClient LongRunningClient to poll for updates on the Operation
+   * @return {@link OperationCallable} callable object
+   */
+  <RequestT, ResponseT, MetadataT>
+      OperationCallable<RequestT, ResponseT, MetadataT> createOperationCallable(
+          HttpJsonCallSettings<RequestT, OperationT> httpJsonCallSettings,
+          OperationCallSettings<RequestT, ResponseT, MetadataT> operationCallSettings,
+          ClientContext clientContext,
+          LongRunningClient longRunningClient);
 
   /**
    * Create a server-streaming callable with. Designed for use by generated code.

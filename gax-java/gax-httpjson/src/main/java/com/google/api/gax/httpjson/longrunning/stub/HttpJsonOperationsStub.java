@@ -35,7 +35,6 @@ import com.google.api.gax.core.BackgroundResource;
 import com.google.api.gax.core.BackgroundResourceAggregation;
 import com.google.api.gax.httpjson.ApiMethodDescriptor;
 import com.google.api.gax.httpjson.HttpJsonCallSettings;
-import com.google.api.gax.httpjson.HttpJsonLongRunningClient;
 import com.google.api.gax.httpjson.HttpJsonOperationSnapshot;
 import com.google.api.gax.httpjson.HttpJsonStubCallableFactory;
 import com.google.api.gax.httpjson.ProtoMessageRequestFormatter;
@@ -43,7 +42,6 @@ import com.google.api.gax.httpjson.ProtoMessageResponseParser;
 import com.google.api.gax.httpjson.ProtoRestSerializer;
 import com.google.api.gax.httpjson.longrunning.OperationsClient.ListOperationsPagedResponse;
 import com.google.api.gax.rpc.ClientContext;
-import com.google.api.gax.rpc.LongRunningClient;
 import com.google.api.gax.rpc.UnaryCallable;
 import com.google.longrunning.CancelOperationRequest;
 import com.google.longrunning.DeleteOperationRequest;
@@ -193,8 +191,6 @@ public class HttpJsonOperationsStub extends OperationsStub {
   private final UnaryCallable<GetOperationRequest, Operation> getOperationCallable;
   private final UnaryCallable<DeleteOperationRequest, Empty> deleteOperationCallable;
   private final UnaryCallable<CancelOperationRequest, Empty> cancelOperationCallable;
-
-  private final LongRunningClient longRunningClient;
   private final BackgroundResource backgroundResources;
   private final HttpJsonStubCallableFactory callableFactory;
 
@@ -300,12 +296,6 @@ public class HttpJsonOperationsStub extends OperationsStub {
         callableFactory.createUnaryCallable(
             cancelOperationTransportSettings, settings.cancelOperationSettings(), clientContext);
 
-    longRunningClient =
-        new HttpJsonLongRunningClient<>(
-            getOperationCallable,
-            getOperationMethodDescriptor.getOperationSnapshotFactory(),
-            getOperationMethodDescriptor.getPollingRequestFactory());
-
     backgroundResources = new BackgroundResourceAggregation(clientContext.getBackgroundResources());
   }
 
@@ -361,11 +351,6 @@ public class HttpJsonOperationsStub extends OperationsStub {
   @Override
   public UnaryCallable<CancelOperationRequest, Empty> cancelOperationCallable() {
     return cancelOperationCallable;
-  }
-
-  @Override
-  public LongRunningClient longRunningClient() {
-    return longRunningClient;
   }
 
   @Override

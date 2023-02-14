@@ -35,6 +35,11 @@ import com.google.api.gax.longrunning.OperationSnapshot;
 import com.google.api.gax.rpc.LongRunningClient;
 import com.google.api.gax.rpc.TranslatingUnaryCallable;
 import com.google.api.gax.rpc.UnaryCallable;
+import com.google.longrunning.CancelOperationRequest;
+import com.google.longrunning.DeleteOperationRequest;
+import com.google.longrunning.GetOperationRequest;
+import com.google.longrunning.Operation;
+import com.google.protobuf.Empty;
 
 /**
  * Implementation of LongRunningClient based on REST transport.
@@ -42,36 +47,49 @@ import com.google.api.gax.rpc.UnaryCallable;
  * <p>Public for technical reasons. For internal use only.
  */
 @InternalApi
-public class HttpJsonLongRunningClient<RequestT, OperationT> implements LongRunningClient {
+public class HttpJsonLongRunningClient implements LongRunningClient {
 
-  private final UnaryCallable<RequestT, OperationT> operationCallable;
-  private final OperationSnapshotFactory<RequestT, OperationT> operationSnapshotFactory;
-  private final PollingRequestFactory<RequestT> pollingRequestFactory;
+  private final UnaryCallable getOperationCallable;
+  private final UnaryCallable cancelOperationCallable;
+  private final UnaryCallable deleteOperationCallable;
 
-  public HttpJsonLongRunningClient(
-      UnaryCallable<RequestT, OperationT> operationCallable,
-      OperationSnapshotFactory<RequestT, OperationT> operationSnapshotFactory,
-      PollingRequestFactory<RequestT> pollingRequestFactory) {
-    this.operationCallable = operationCallable;
-    this.operationSnapshotFactory = operationSnapshotFactory;
-    this.pollingRequestFactory = pollingRequestFactory;
+  private HttpJsonLongRunningClient(
+      UnaryCallable getOperationCallable,
+      UnaryCallable cancelOperationCallable,
+      UnaryCallable deleteOperationCallable) {
+    this.getOperationCallable = getOperationCallable;
+    this.cancelOperationCallable = cancelOperationCallable;
+    this.deleteOperationCallable = deleteOperationCallable;
   }
+
+  //  private final UnaryCallable<RequestT, OperationT> operationCallable;
+  //  private final OperationSnapshotFactory<RequestT, OperationT> operationSnapshotFactory;
+  //  private final PollingRequestFactory<RequestT> pollingRequestFactory;
+
+  //  public HttpJsonLongRunningClient(
+  //      UnaryCallable<RequestT, OperationT> operationCallable,
+  //      OperationSnapshotFactory<RequestT, OperationT> operationSnapshotFactory,
+  //      PollingRequestFactory<RequestT> pollingRequestFactory) {
+  //    this.operationCallable = operationCallable;
+  //    this.operationSnapshotFactory = operationSnapshotFactory;
+  //    this.pollingRequestFactory = pollingRequestFactory;
+  //  }
 
   /** {@inheritDoc} */
   @Override
   public UnaryCallable<String, OperationSnapshot> getOperationCallable() {
     return TranslatingUnaryCallable.create(
-        operationCallable,
-        new ApiFunction<String, RequestT>() {
+        getOperationCallable,
+        new ApiFunction<String, GetOperationRequest>() {
           @Override
-          public RequestT apply(String id) {
-            return pollingRequestFactory.create(id);
+          public GetOperationRequest apply(String request) {
+            return GetOperationRequest.newBuilder().setName(request).build();
           }
         },
-        new ApiFunction<OperationT, OperationSnapshot>() {
+        new ApiFunction<Operation, OperationSnapshot>() {
           @Override
-          public OperationSnapshot apply(OperationT operation) {
-            return operationSnapshotFactory.create(null, operation);
+          public OperationSnapshot apply(Operation operation) {
+            return HttpJsonOperationSnapshot.create(operation);
           }
         });
   }
@@ -79,12 +97,46 @@ public class HttpJsonLongRunningClient<RequestT, OperationT> implements LongRunn
   /** {@inheritDoc} */
   @Override
   public UnaryCallable<String, Void> cancelOperationCallable() {
-    return null;
+    return TranslatingUnaryCallable.create(
+        cancelOperationCallable,
+        new ApiFunction<String, CancelOperationRequest>() {
+          @Override
+          public CancelOperationRequest apply(String request) {
+            return CancelOperationRequest.newBuilder().setName(request).build();
+          }
+        },
+        new ApiFunction<Empty, Void>() {
+          @Override
+          public Void apply(Empty empty) {
+            return null;
+          }
+        });
   }
 
   /** {@inheritDoc} */
   @Override
   public UnaryCallable<String, Void> deleteOperationCallable() {
-    return null;
+    return TranslatingUnaryCallable.create(
+        deleteOperationCallable,
+        new ApiFunction<String, DeleteOperationRequest>() {
+          @Override
+          public DeleteOperationRequest apply(String request) {
+            return DeleteOperationRequest.newBuilder().setName(request).build();
+          }
+        },
+        new ApiFunction<Empty, Void>() {
+          @Override
+          public Void apply(Empty empty) {
+            return null;
+          }
+        });
+  }
+
+  public static HttpJsonLongRunningClient create(
+      UnaryCallable getOperationCallable,
+      UnaryCallable cancelOperationCallable,
+      UnaryCallable deleteOperationCallable) {
+    return new HttpJsonLongRunningClient(
+        getOperationCallable, cancelOperationCallable, deleteOperationCallable);
   }
 }
