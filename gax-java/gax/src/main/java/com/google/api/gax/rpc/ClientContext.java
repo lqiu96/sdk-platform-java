@@ -41,8 +41,10 @@ import com.google.api.gax.rpc.mtls.MtlsProvider;
 import com.google.api.gax.tracing.ApiTracerFactory;
 import com.google.api.gax.tracing.BaseApiTracerFactory;
 import com.google.auth.Credentials;
+import com.google.auth.Retryable;
 import com.google.auth.oauth2.GdchCredentials;
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -68,6 +70,9 @@ import org.threeten.bp.Duration;
 @AutoValue
 public abstract class ClientContext {
   private static final String QUOTA_PROJECT_ID_HEADER_KEY = "x-goog-user-project";
+  private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com";
+  private static final long UNIVERSE_DOMAIN_TIMEOUT_MS = 60000L;
+  private static final long UNIVERSE_DOMAIN_RETRY_DELAY_MS = 2000L;
 
   /**
    * The objects that need to be closed in order to clean up the resources created in the process of
@@ -177,6 +182,14 @@ public abstract class ClientContext {
     final ScheduledExecutorService backgroundExecutor = backgroundExecutorProvider.getExecutor();
 
     Credentials credentials = settings.getCredentialsProvider().getCredentials();
+    String universeDomain;
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    try {
+      universeDomain = getUniverseDomain(credentials, stopwatch);
+    } finally {
+      stopwatch.stop();
+    }
+    System.out.println("Universe Domain: " + universeDomain);
 
     String settingsGdchApiAudience = settings.getGdchApiAudience();
     if (credentials instanceof GdchCredentials) {
@@ -285,6 +298,39 @@ public abstract class ClientContext {
         .setStreamWatchdogCheckInterval(settings.getStreamWatchdogCheckInterval())
         .setTracerFactory(settings.getTracerFactory())
         .build();
+  }
+
+  private static String getUniverseDomain(Credentials credentials, Stopwatch stopwatch)
+      throws IOException {
+    // If NoCredentialsProvider is used, default to the Google Default Universe
+    if (credentials == null) {
+      return GOOGLE_DEFAULT_UNIVERSE;
+    }
+    boolean shouldRetry;
+    do {
+      try {
+        // getUniverseDomain() will throw a Retryable IOException if Universe Domain is not found
+        return credentials.getUniverseDomain();
+      } catch (IOException ex) {
+        if (ex instanceof Retryable) {
+          Retryable retryable = (Retryable) ex;
+          long elapsedMs = stopwatch.elapsed().toMillis();
+          shouldRetry = retryable.isRetryable() && elapsedMs < UNIVERSE_DOMAIN_TIMEOUT_MS;
+          System.out.println("Should Retry: " + shouldRetry + ", Elapsed Time: " + elapsedMs);
+          try {
+            Thread.sleep(UNIVERSE_DOMAIN_RETRY_DELAY_MS);
+          } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+          }
+        } else {
+          // Re-throw as Auth Library has no idea if this exception is not a Retryable interface
+          throw ex;
+        }
+      }
+    } while (shouldRetry);
+    // Throw an IOException as either the Auth Library tell us not to retry polling the value
+    // or the default universe_domain timeout has exceeded
+    throw new IOException("Unable to retrieve the Universe Domain value from the Credentials");
   }
 
   /**
