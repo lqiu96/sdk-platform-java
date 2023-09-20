@@ -71,8 +71,8 @@ import org.threeten.bp.Duration;
 public abstract class ClientContext {
   private static final String QUOTA_PROJECT_ID_HEADER_KEY = "x-goog-user-project";
   private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com:443";
-  private static final int UNIVERSE_DOMAIN_TIMEOUT_SEC = 60;
-  private static final int UNIVERSE_DOMAIN_RETRY_DELAY = 2;
+  private static final long UNIVERSE_DOMAIN_TIMEOUT_MS = 60000L;
+  private static final long UNIVERSE_DOMAIN_RETRY_DELAY_MS = 2000L;
 
   /**
    * The objects that need to be closed in order to clean up the resources created in the process of
@@ -309,24 +309,27 @@ public abstract class ClientContext {
     boolean shouldRetry;
     do {
       try {
-        // getUniverseDomain() will throw an IOException if Universe Domain is not found
+        // getUniverseDomain() will throw a Retryable IOException if Universe Domain is not found
         return credentials.getUniverseDomain();
       } catch (IOException ex) {
         if (ex instanceof Retryable) {
           Retryable retryable = (Retryable) ex;
-          long elapsedSeconds = stopwatch.elapsed().getSeconds();
-          shouldRetry = retryable.isRetryable() && elapsedSeconds < UNIVERSE_DOMAIN_TIMEOUT_SEC;
-          System.out.println("Should Retry: " + shouldRetry + ", Elapsed Time: " + elapsedSeconds);
+          long elapsedMs = stopwatch.elapsed().toMillis();
+          shouldRetry = retryable.isRetryable() && elapsedMs < UNIVERSE_DOMAIN_TIMEOUT_MS;
+          System.out.println("Should Retry: " + shouldRetry + ", Elapsed Time: " + elapsedMs);
           try {
-            Thread.sleep(UNIVERSE_DOMAIN_RETRY_DELAY * 1000);
+            Thread.sleep(UNIVERSE_DOMAIN_RETRY_DELAY_MS);
           } catch (InterruptedException e) {
             throw new RuntimeException(e);
           }
         } else {
+          // Re-throw as Auth Library has no idea if this exception is not a Retryable interface
           throw ex;
         }
       }
     } while (shouldRetry);
+    // Throw an IOException as either the Auth Library tell us not to retry polling the value
+    // or the default universe_domain timeout has exceeded
     throw new IOException("Unable to retrieve the Universe Domain value from the Credentials");
   }
 
