@@ -70,7 +70,7 @@ import org.threeten.bp.Duration;
 @AutoValue
 public abstract class ClientContext {
   private static final String QUOTA_PROJECT_ID_HEADER_KEY = "x-goog-user-project";
-  private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com:443";
+  private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com";
   private static final long UNIVERSE_DOMAIN_TIMEOUT_MS = 60000L;
   private static final long UNIVERSE_DOMAIN_RETRY_DELAY_MS = 2000L;
 
