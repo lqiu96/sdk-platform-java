@@ -322,7 +322,7 @@ public class IamCredentialsStubSettings extends StubSettings<IamCredentialsStubS
       builder.setTransportChannelProvider(defaultTransportChannelProvider());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultApiClientHeaderProviderBuilder().build());
-      builder.setDefaultEndpoint(getDefaultEndpoint());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
       builder.setHostServiceName(HOST_SERVICE_NAME);
@@ -336,7 +336,7 @@ public class IamCredentialsStubSettings extends StubSettings<IamCredentialsStubS
       builder.setTransportChannelProvider(defaultHttpJsonTransportProviderBuilder().build());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultHttpJsonApiClientHeaderProviderBuilder().build());
-      builder.setDefaultEndpoint(getDefaultEndpoint());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
       builder.setHostServiceName(HOST_SERVICE_NAME);

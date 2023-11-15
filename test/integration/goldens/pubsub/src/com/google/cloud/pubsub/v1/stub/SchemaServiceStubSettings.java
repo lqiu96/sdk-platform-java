@@ -537,7 +537,7 @@ public class SchemaServiceStubSettings extends StubSettings<SchemaServiceStubSet
       builder.setTransportChannelProvider(defaultTransportChannelProvider());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultApiClientHeaderProviderBuilder().build());
-      builder.setDefaultEndpoint(getDefaultEndpoint());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
       builder.setHostServiceName(HOST_SERVICE_NAME);
