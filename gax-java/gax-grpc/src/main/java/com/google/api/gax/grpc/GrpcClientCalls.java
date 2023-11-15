@@ -34,8 +34,10 @@ import com.google.api.core.AbstractApiFuture;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.BetaApi;
 import com.google.api.gax.rpc.ApiCallContext;
+import com.google.api.gax.rpc.ApiExceptionFactory;
 import com.google.api.gax.rpc.EndpointContext;
 import com.google.api.gax.tracing.ApiTracer.Scope;
+import com.google.auth.Retryable;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -97,17 +99,29 @@ class GrpcClientCalls {
       channel = ClientInterceptors.intercept(channel, interceptor);
     }
 
+    EndpointContext endpointContext = grpcContext.getEndpointContext();
     try {
-      EndpointContext endpointContext = grpcContext.getEndpointContext();
       if (!endpointContext.isValidUniverseDomain(null)) {
-        throw new RuntimeException(
-            String.format(
-                EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
-                grpcContext.getEndpointContext().resolveUniverseDomain(),
-                "test.com"));
+        throw ApiExceptionFactory.createException(
+            new Throwable(
+                String.format(
+                    EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
+                    endpointContext.resolveUniverseDomain(),
+                    "test.com")),
+            GrpcStatusCode.of(Status.Code.PERMISSION_DENIED),
+            false);
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      Retryable retryable;
+      if (e instanceof Retryable) {
+        retryable = (Retryable) e;
+        throw ApiExceptionFactory.createException(
+            new Throwable(EndpointContext.UNIVERSE_DOMAIN_UNAVAILABLE_MESSAGE),
+            GrpcStatusCode.of(Status.Code.UNAVAILABLE),
+            retryable.isRetryable());
+      } else {
+        throw new RuntimeException(e);
+      }
     }
 
     try (Scope ignored = grpcContext.getTracer().inScope()) {

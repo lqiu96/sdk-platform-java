@@ -32,7 +32,10 @@ package com.google.api.gax.httpjson;
 import com.google.api.core.AbstractApiFuture;
 import com.google.api.core.ApiFuture;
 import com.google.api.gax.rpc.ApiCallContext;
+import com.google.api.gax.rpc.ApiExceptionFactory;
 import com.google.api.gax.rpc.EndpointContext;
+import com.google.api.gax.rpc.StatusCode;
+import com.google.auth.Retryable;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,18 +77,30 @@ class HttpJsonClientCalls {
       httpJsonContext = httpJsonContext.withCallOptions(callOptions);
     }
 
+    EndpointContext endpointContext = httpJsonContext.getEndpointContext();
     try {
-      EndpointContext endpointContext = httpJsonContext.getEndpointContext();
       if (!endpointContext.isValidUniverseDomain(
           httpJsonContext.getCallOptions().getCredentials())) {
-        throw new RuntimeException(
-            String.format(
-                EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
-                endpointContext.resolveUniverseDomain(),
-                "test.com"));
+        throw ApiExceptionFactory.createException(
+            new Throwable(
+                String.format(
+                    EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
+                    endpointContext.resolveUniverseDomain(),
+                    "test.com")),
+            HttpJsonStatusCode.of(StatusCode.Code.PERMISSION_DENIED),
+            false);
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      Retryable retryable;
+      if (e instanceof Retryable) {
+        retryable = (Retryable) e;
+        throw ApiExceptionFactory.createException(
+            new Throwable(EndpointContext.UNIVERSE_DOMAIN_UNAVAILABLE_MESSAGE),
+            HttpJsonStatusCode.of(StatusCode.Code.UNAVAILABLE),
+            retryable.isRetryable());
+      } else {
+        throw new RuntimeException(e);
+      }
     }
 
     // TODO: add headers interceptor logic

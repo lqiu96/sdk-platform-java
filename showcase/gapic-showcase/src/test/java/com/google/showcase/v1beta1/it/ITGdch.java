@@ -137,7 +137,7 @@ public class ITGdch {
       throws IOException {
 
     // we create the client as usual - no audience passed
-    String testEndpoint = "custom-endpoint:123";
+    String testEndpoint = "localhost:123";
     settings = settings.toBuilder().setEndpoint(testEndpoint).build();
     context = ClientContext.create(settings);
     stubSettings = EchoStubSettings.newBuilder(context).build();
@@ -186,7 +186,8 @@ public class ITGdch {
     // audience. It should
     // be created without issues
     String testAudience = "valid-audience";
-    settings = settings.toBuilder().setGdchApiAudience(testAudience).build();
+    settings =
+        settings.toBuilder().setGdchApiAudience(testAudience).setEndpoint("localhost:123").build();
     context = ClientContext.create(settings);
     stubSettings = EchoStubSettings.newBuilder(context).build();
     client = EchoClient.create(stubSettings.createStub());

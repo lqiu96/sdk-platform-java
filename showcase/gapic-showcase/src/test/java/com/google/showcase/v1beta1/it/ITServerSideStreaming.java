@@ -123,7 +123,8 @@ public class ITServerSideStreaming {
             .setTransportChannelProvider(
                 EchoSettings.defaultGrpcTransportProviderBuilder()
                     .setChannelConfigurator(ManagedChannelBuilder::usePlaintext)
-                    .build());
+                    .build())
+            .setEndpoint("http://localhost:7469");
 
     settings
         .expandSettings()

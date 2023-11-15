@@ -644,8 +644,8 @@ public class ClientContextTest {
         .containsEntry("user-agent", "user-supplied-agent internal-agent");
   }
 
-  private static String endpoint = "https://foo.googleapis.com:443";
-  private static String mtlsEndpoint = "https://foo.mtls.googleapis.com:443";
+  private static String endpoint = "foo.googleapis.com:443";
+  private static String mtlsEndpoint = "foo.mtls.googleapis.com:443";
 
   @Test
   public void testAutoUseMtlsEndpoint() throws IOException {

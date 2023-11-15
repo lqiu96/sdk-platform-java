@@ -42,9 +42,11 @@ import javax.annotation.Nullable;
 public abstract class EndpointContext {
   public static final String INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE =
       "The configured universe domain (%s) does not match the universe domain found in the credentials (%s). If you haven't configured the universe domain explicitly, `googleapis.com` is the default.";
+  public static final String UNIVERSE_DOMAIN_UNAVAILABLE_MESSAGE =
+      "Unable to retrieve the Universe Domain";
   private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com";
   private static final String DEFAULT_PORT = "443";
-  private static final String ENDPOINT_TEMPLATE = "https://SERVICE_NAME.UNIVERSE_DOMAIN:PORT";
+  private static final String ENDPOINT_TEMPLATE = "SERVICE_NAME.UNIVERSE_DOMAIN:PORT";
 
   public abstract String hostServiceName();
 
@@ -107,13 +109,15 @@ public abstract class EndpointContext {
         resolvedUniverseDomain = universeDomain();
       }
     } else if (customEndpoint != null && !customEndpoint.isEmpty()) {
-      if (customEndpoint.contains("https://")) {
-        customEndpoint = customEndpoint.substring(8);
-      }
       if (customEndpoint.contains("localhost")) {
         resolvedEndpoint = customEndpoint;
         resolvedUniverseDomain = GOOGLE_DEFAULT_UNIVERSE;
         return;
+      }
+      if (customEndpoint.contains("http://")) {
+        customEndpoint = customEndpoint.substring(7);
+      } else if (customEndpoint.contains("https://")) {
+        customEndpoint = customEndpoint.substring(8);
       }
       // Parse the custom customEndpoint for the universe domain
       int periodIndex = customEndpoint.indexOf('.');
