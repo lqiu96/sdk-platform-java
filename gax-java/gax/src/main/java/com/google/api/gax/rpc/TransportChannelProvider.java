@@ -143,10 +143,21 @@ public interface TransportChannelProvider {
    */
   String getTransportName();
 
+  /**
+   * User set custom endpoint for the Transport Provider
+   *
+   * <p>This is not the resolved endpoint used by GAPICs
+   */
   default String getEndpoint() {
     return null;
   }
 
+  /**
+   * This is different from {@link #needsEndpoint()} as this determines if the
+   * TransportChannelProvider still needs to resolve the endpoint.
+   *
+   * <p>Used by the ClientContext to resolve the endpoint
+   */
   default boolean needsResolvedEndpoint() {
     return false;
   }

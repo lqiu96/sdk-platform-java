@@ -36,8 +36,6 @@ import com.google.api.gax.grpc.testing.MockServiceHelper;
 import com.google.api.gax.rpc.InvalidArgumentException;
 import com.google.common.collect.Lists;
 import com.google.longrunning.OperationsClient.ListOperationsPagedResponse;
-import com.google.longrunning.stub.OperationsStub;
-import com.google.longrunning.stub.OperationsStubSettings;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
@@ -81,13 +79,7 @@ public class OperationsClientTest {
             .setTransportChannelProvider(channelProvider)
             .setCredentialsProvider(NoCredentialsProvider.create())
             .build();
-    OperationsStub operationsStub =
-        ((OperationsStubSettings) settings.getStubSettings())
-            .toBuilder()
-            .setHostServiceName("longrunning")
-            .build()
-            .createStub();
-    client = OperationsClient.create(operationsStub);
+    client = OperationsClient.create(settings);
   }
 
   @After

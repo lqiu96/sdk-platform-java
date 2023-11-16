@@ -16,6 +16,7 @@ package com.google.api.generator.gapic.model;
 
 import com.google.api.generator.engine.ast.TypeNode;
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -53,10 +54,8 @@ public abstract class Service {
   }
 
   public String hostServiceName() {
-    if (!Strings.isNullOrEmpty(defaultHost())) {
-      return parseHostServiceName(defaultHost());
-    }
-    return "";
+    Preconditions.checkState(!Strings.isNullOrEmpty(defaultHost()), "Default Host is not supplied");
+    return parseHostServiceName(defaultHost());
   }
 
   public String apiShortName() {
@@ -192,12 +191,14 @@ public abstract class Service {
   }
 
   // Parse the service name from the default host configured in the protos
-  // or service yaml file. Value is expected to contain `.googleapis.com`
+  // or service yaml file. For Google Cloud Services, the default host value
+  // is expected to contain `.googleapis.com`. Exceptions may exist (i.e. localhost),
+  // in which case we will return an empty string.
   private static String parseHostServiceName(String defaultHost) {
-    if (!defaultHost.contains(".googleapis.com")) {
-      return "";
+    if (defaultHost.contains(".googleapis.com")) {
+      return Iterables.getFirst(Splitter.on(".").split(defaultHost), defaultHost);
     }
-    return Iterables.getFirst(Splitter.on(".").split(defaultHost), defaultHost);
+    return "";
   }
 
   // Parse defaultHost for apiShortName for the RegionTag. Need to account for regional default

@@ -34,8 +34,6 @@ import com.google.api.gax.httpjson.GaxHttpJsonProperties;
 import com.google.api.gax.httpjson.longrunning.OperationsClient.ListOperationsPagedResponse;
 import com.google.api.gax.httpjson.longrunning.stub.HttpJsonOperationsCallableFactory;
 import com.google.api.gax.httpjson.longrunning.stub.HttpJsonOperationsStub;
-import com.google.api.gax.httpjson.longrunning.stub.OperationsStub;
-import com.google.api.gax.httpjson.longrunning.stub.OperationsStubSettings;
 import com.google.api.gax.httpjson.testing.MockHttpService;
 import com.google.api.gax.rpc.ApiClientHeaderProvider;
 import com.google.api.gax.rpc.ApiException;
@@ -86,13 +84,7 @@ public class OperationsClientTest {
                     .build())
             .setCredentialsProvider(NoCredentialsProvider.create())
             .build();
-    OperationsStub operationsStub =
-        ((OperationsStubSettings) settings.getStubSettings())
-            .toBuilder()
-            .setHostServiceName("longrunning")
-            .build()
-            .createStub();
-    client = OperationsClient.create(operationsStub);
+    client = OperationsClient.create(settings);
   }
 
   @AfterClass

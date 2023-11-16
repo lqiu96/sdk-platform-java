@@ -116,11 +116,7 @@ public class GrpcLongRunningTest {
             .setTransportChannelProvider(operationsChannelProvider)
             .build();
     operationsStub =
-        GrpcOperationsStub.create(
-            ((OperationsStubSettings) settings.getStubSettings())
-                .toBuilder()
-                .setHostServiceName("longrunning")
-                .build());
+        GrpcOperationsStub.create(((OperationsStubSettings) settings.getStubSettings()));
 
     UnaryCallSettings<Integer, OperationSnapshot> initialCallSettings =
         UnaryCallSettings.<Integer, OperationSnapshot>newUnaryCallSettingsBuilder()
