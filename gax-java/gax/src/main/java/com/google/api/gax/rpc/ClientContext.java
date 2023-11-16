@@ -156,6 +156,9 @@ public abstract class ClientContext {
     final ScheduledExecutorService backgroundExecutor = backgroundExecutorProvider.getExecutor();
 
     Credentials credentials = settings.getCredentialsProvider().getCredentials();
+    EndpointContext endpointContext = settings.getEndpointContext();
+    String endpoint = null;
+    String universeDomain = null;
 
     String settingsGdchApiAudience = settings.getGdchApiAudience();
     if (credentials instanceof GdchCredentials) {
@@ -180,9 +183,13 @@ public abstract class ClientContext {
         throw new IllegalArgumentException("The GDC-H API audience string is not a valid URI", ex);
       }
       credentials = ((GdchCredentials) credentials).createWithGdchAudience(gdchAudienceUri);
+      endpoint = audienceString;
     } else if (!Strings.isNullOrEmpty(settingsGdchApiAudience)) {
       throw new IllegalArgumentException(
           "GDC-H API audience can only be set when using GdchCredentials");
+    } else {
+      endpoint = endpointContext.resolveEndpoint();
+      universeDomain = endpointContext.resolveUniverseDomain();
     }
 
     if (settings.getQuotaProjectId() != null && credentials != null) {
@@ -207,9 +214,6 @@ public abstract class ClientContext {
     if (transportChannelProvider.needsCredentials() && credentials != null) {
       transportChannelProvider = transportChannelProvider.withCredentials(credentials);
     }
-    EndpointContext endpointContext = settings.getEndpointContext();
-    String endpoint = endpointContext.resolveEndpoint();
-    String universeDomain = endpointContext.resolveUniverseDomain();
     if (transportChannelProvider.needsResolvedEndpoint()) {
       transportChannelProvider = transportChannelProvider.withEndpoint(endpoint);
     }

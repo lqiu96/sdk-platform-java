@@ -102,7 +102,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     this.universeDomain = builder.universeDomain;
     this.mtlsEndpoint = builder.mtlsEndpoint;
     this.switchToMtlsEndpointAllowed = builder.switchToMtlsEndpointAllowed;
-    this.endpointContext = builder.endpointContext;
+    this.endpointContext = builder.endpointContextBuilder.build();
     this.quotaProjectId = builder.quotaProjectId;
     this.streamWatchdogProvider = builder.streamWatchdogProvider;
     this.streamWatchdogCheckInterval = builder.streamWatchdogCheckInterval;
@@ -279,7 +279,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     @Nonnull private Duration streamWatchdogCheckInterval;
     @Nonnull private ApiTracerFactory tracerFactory;
     private boolean deprecatedExecutorProviderSet;
-    @Nonnull private EndpointContext endpointContext;
+    @Nonnull private EndpointContext.Builder endpointContextBuilder;
 
     /**
      * Indicate when creating transport whether it is allowed to use mTLS endpoint instead of the
@@ -301,7 +301,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       this.universeDomain = settings.universeDomain;
       this.mtlsEndpoint = settings.mtlsEndpoint;
       this.switchToMtlsEndpointAllowed = settings.switchToMtlsEndpointAllowed;
-      this.endpointContext = settings.endpointContext;
+      this.endpointContextBuilder = settings.endpointContext.toBuilder();
       this.quotaProjectId = settings.quotaProjectId;
       this.streamWatchdogProvider = settings.streamWatchdogProvider;
       this.streamWatchdogCheckInterval = settings.streamWatchdogCheckInterval;
@@ -338,7 +338,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         this.endpoint = null;
         this.universeDomain = null;
         this.mtlsEndpoint = null;
-        this.endpointContext = EndpointContext.newBuilder().build();
+        this.endpointContextBuilder = EndpointContext.newBuilder();
         this.quotaProjectId = null;
         this.streamWatchdogProvider = InstantiatingWatchdogProvider.create();
         this.streamWatchdogCheckInterval = Duration.ofSeconds(10);
@@ -362,14 +362,13 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         if (this.endpoint != null) {
           this.mtlsEndpoint = this.endpoint.replace("googleapis.com", "mtls.googleapis.com");
         }
-        this.endpointContext =
+        this.endpointContextBuilder =
             EndpointContext.newBuilder()
                 .setClientSettingsEndpoint(clientContext.getEndpoint())
                 .setTransportChannelEndpoint(transportChannelProvider.getEndpoint())
                 .setMtlsEndpoint(mtlsEndpoint)
                 .setSwitchToMtlsEndpointAllowed(switchToMtlsEndpointAllowed)
-                .setUniverseDomain(clientContext.getUniverseDomain())
-                .build();
+                .setUniverseDomain(clientContext.getUniverseDomain());
         this.streamWatchdogProvider =
             FixedWatchdogProvider.create(clientContext.getStreamWatchdog());
         this.streamWatchdogCheckInterval = clientContext.getStreamWatchdogCheckInterval();
@@ -465,11 +464,8 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
      */
     public B setTransportChannelProvider(TransportChannelProvider transportChannelProvider) {
       this.transportChannelProvider = transportChannelProvider;
-      this.endpointContext =
-          this.endpointContext
-              .toBuilder()
-              .setTransportChannelEndpoint(transportChannelProvider.getEndpoint())
-              .build();
+      this.endpointContextBuilder.setTransportChannelEndpoint(
+          transportChannelProvider.getEndpoint());
       return self();
     }
 
@@ -494,8 +490,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     }
 
     public B setHostServiceName(String hostServiceName) {
-      this.endpointContext =
-          this.endpointContext.toBuilder().setHostServiceName(hostServiceName).build();
+      this.endpointContextBuilder.setHostServiceName(hostServiceName);
       return self();
     }
 
@@ -505,36 +500,28 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       if (this.endpoint != null && this.mtlsEndpoint == null) {
         this.mtlsEndpoint = this.endpoint.replace("googleapis.com", "mtls.googleapis.com");
       }
-      this.endpointContext =
-          this.endpointContext
-              .toBuilder()
-              .setClientSettingsEndpoint(endpoint)
-              .setMtlsEndpoint(mtlsEndpoint)
-              .setSwitchToMtlsEndpointAllowed(switchToMtlsEndpointAllowed)
-              .build();
+      this.endpointContextBuilder
+          .setClientSettingsEndpoint(endpoint)
+          .setMtlsEndpoint(mtlsEndpoint)
+          .setSwitchToMtlsEndpointAllowed(switchToMtlsEndpointAllowed);
       return self();
     }
 
     public B setUniverseDomain(String universeDomain) {
       this.universeDomain = universeDomain;
-      this.endpointContext =
-          this.endpointContext.toBuilder().setUniverseDomain(universeDomain).build();
+      this.endpointContextBuilder.setUniverseDomain(universeDomain);
       return self();
     }
 
     protected B setSwitchToMtlsEndpointAllowed(boolean switchToMtlsEndpointAllowed) {
       this.switchToMtlsEndpointAllowed = switchToMtlsEndpointAllowed;
-      this.endpointContext =
-          this.endpointContext
-              .toBuilder()
-              .setSwitchToMtlsEndpointAllowed(switchToMtlsEndpointAllowed)
-              .build();
+      this.endpointContextBuilder.setSwitchToMtlsEndpointAllowed(switchToMtlsEndpointAllowed);
       return self();
     }
 
     public B setMtlsEndpoint(String mtlsEndpoint) {
       this.mtlsEndpoint = mtlsEndpoint;
-      this.endpointContext = this.endpointContext.toBuilder().setMtlsEndpoint(mtlsEndpoint).build();
+      this.endpointContextBuilder.setMtlsEndpoint(mtlsEndpoint);
       return self();
     }
 
