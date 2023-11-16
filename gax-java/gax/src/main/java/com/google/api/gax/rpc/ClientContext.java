@@ -159,12 +159,16 @@ public abstract class ClientContext {
 
     String settingsGdchApiAudience = settings.getGdchApiAudience();
     if (credentials instanceof GdchCredentials) {
+      if (!Strings.isNullOrEmpty(settings.getUniverseDomain())) {
+        throw new IllegalArgumentException(
+            "Universe domain configuration is incompatible with GDC-H");
+      }
       // We recompute the GdchCredentials with the audience
       String audienceString;
       if (!Strings.isNullOrEmpty(settingsGdchApiAudience)) {
         audienceString = settingsGdchApiAudience;
-      } else if (!Strings.isNullOrEmpty(settings.getUnresolvedEndpoint())) {
-        audienceString = settings.getUnresolvedEndpoint();
+      } else if (!Strings.isNullOrEmpty(settings.getEndpoint())) {
+        audienceString = settings.getEndpoint();
       } else {
         throw new IllegalArgumentException("Could not infer GDCH api audience from settings");
       }

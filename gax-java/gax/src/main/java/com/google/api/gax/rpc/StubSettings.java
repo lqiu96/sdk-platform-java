@@ -32,7 +32,6 @@ package com.google.api.gax.rpc;
 import com.google.api.core.ApiClock;
 import com.google.api.core.ApiFunction;
 import com.google.api.core.BetaApi;
-import com.google.api.core.InternalApi;
 import com.google.api.core.NanoClock;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.ExecutorProvider;
@@ -143,30 +142,51 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
   }
 
   /**
-   * Resolves the endpoint with the correct Universe Domain
+   * Returns the endpoint set by the client or the user
    *
-   * @return Resolved Endpoint or null if there is any issue resolving it
+   * @return Unresolved endpoint
    */
   public final String getEndpoint() {
-    try {
-      return endpointContext.resolveEndpoint();
-    } catch (IOException e) {
-      return null;
-    }
-  }
-
-  // This is to return the custom user set endpoint for GDC-H
-  @InternalApi
-  final String getUnresolvedEndpoint() {
-    return endpoint;
+    return getEndpoint(false);
   }
 
   /**
-   * Resolves the Universe Domain
+   * If false, returns the endpoint set by the client or the user If true, returns the resolved
+   * endpoint
    *
-   * @return Resolved Universe Domain or null if there is any issue resolving it
+   * @param resolved boolean flag to resolve the endpoint
+   * @return Resolved or Unresolved endpoint
+   */
+  public final String getEndpoint(boolean resolved) {
+    if (!resolved) {
+      return endpoint;
+    }
+    try {
+      return endpointContext.resolveEndpoint();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to resolve the endpoint");
+    }
+  }
+
+  /**
+   * Returns the Universe Domain set by the user
+   *
+   * @return Unresolved endpoint
    */
   public final String getUniverseDomain() {
+    return getUniverseDomain(false);
+  }
+
+  /**
+   * If false, returns the endpoint set by the user If true, returns the resolved endpoint
+   *
+   * @param resolved boolean flag to resolve the universe domain
+   * @return Resolved or Unresolved Universe Domain
+   */
+  public final String getUniverseDomain(boolean resolved) {
+    if (!resolved) {
+      return universeDomain;
+    }
     try {
       return endpointContext.resolveUniverseDomain();
     } catch (IOException e) {

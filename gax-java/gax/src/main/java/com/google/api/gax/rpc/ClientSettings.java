@@ -93,12 +93,43 @@ public abstract class ClientSettings<SettingsT extends ClientSettings<SettingsT>
     return stubSettings.getClock();
   }
 
+  /**
+   * Returns the endpoint set by the client or the user
+   *
+   * @return Unresolved endpoint
+   */
   public final String getEndpoint() {
     return stubSettings.getEndpoint();
   }
 
+  /**
+   * If false, returns the endpoint set by the client or the user If true, returns the resolved
+   * endpoint
+   *
+   * @param resolved boolean flag to resolve the endpoint
+   * @return Resolved or Unresolved endpoint
+   */
+  public final String getEndpoint(boolean resolved) {
+    return stubSettings.getEndpoint(resolved);
+  }
+
+  /**
+   * Returns the Universe Domain set by the user
+   *
+   * @return Unresolved endpoint
+   */
   public final String getUniverseDomain() {
     return stubSettings.getUniverseDomain();
+  }
+
+  /**
+   * If false, returns the endpoint set by the user If true, returns the resolved endpoint
+   *
+   * @param resolved boolean flag to resolve the universe domain
+   * @return Resolved or Unresolved Universe Domain
+   */
+  public final String getUniverseDomain(boolean resolved) {
+    return stubSettings.getUniverseDomain(resolved);
   }
 
   public final String getQuotaProjectId() {

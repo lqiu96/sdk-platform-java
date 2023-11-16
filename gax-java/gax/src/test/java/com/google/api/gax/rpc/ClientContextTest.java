@@ -775,7 +775,7 @@ public class ClientContextTest {
   public void testSwitchToMtlsEndpointAllowed() throws IOException {
     StubSettings settings = new FakeStubSettings.Builder().setHostServiceName("foo").build();
     assertFalse(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint());
+    assertEquals(endpoint, settings.getEndpoint(true));
 
     settings =
         new FakeStubSettings.Builder()
@@ -784,7 +784,7 @@ public class ClientContextTest {
             .setSwitchToMtlsEndpointAllowed(true)
             .build();
     assertTrue(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint());
+    assertEquals(endpoint, settings.getEndpoint(true));
 
     // Test setEndpoint sets the switchToMtlsEndpointAllowed value to false.
     settings =
@@ -794,7 +794,7 @@ public class ClientContextTest {
             .setEndpoint(endpoint)
             .build();
     assertFalse(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint());
+    assertEquals(endpoint, settings.getEndpoint(true));
   }
 
   @Test
