@@ -37,6 +37,7 @@ import com.google.api.gax.rpc.ApiCallContext;
 import com.google.api.gax.rpc.ApiExceptionFactory;
 import com.google.api.gax.rpc.EndpointContext;
 import com.google.api.gax.tracing.ApiTracer.Scope;
+import com.google.auth.Credentials;
 import com.google.auth.Retryable;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -101,12 +102,14 @@ class GrpcClientCalls {
 
     EndpointContext endpointContext = grpcContext.getEndpointContext();
     try {
-      if (!endpointContext.isValidUniverseDomain(null)) {
+      Credentials credentials = grpcContext.getCredentials();
+      if (!endpointContext.isValidUniverseDomain(credentials)) {
         throw ApiExceptionFactory.createException(
             new Throwable(
                 String.format(
                     EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
                     endpointContext.resolveUniverseDomain(),
+                    // Param should be credentials.getUniverseDomain()
                     "test.com")),
             GrpcStatusCode.of(Status.Code.PERMISSION_DENIED),
             false);
