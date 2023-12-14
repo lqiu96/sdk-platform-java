@@ -156,7 +156,14 @@ public abstract class ClientContext {
     final ScheduledExecutorService backgroundExecutor = backgroundExecutorProvider.getExecutor();
 
     Credentials credentials = settings.getCredentialsProvider().getCredentials();
-    EndpointContext endpointContext = settings.getEndpointContext();
+    EndpointContext endpointContext =
+        EndpointContext.newBuilder()
+            .setClientSettingsEndpoint(settings.getEndpoint())
+            .setTransportChannelProviderEndpoint(
+                settings.getTransportChannelProvider().getEndpoint())
+            .setMtlsEndpoint(settings.getMtlsEndpoint())
+            .setSwitchToMtlsEndpointAllowed(settings.getSwitchToMtlsEndpointAllowed())
+            .build();
     String endpoint = null;
     String universeDomain = null;
 
@@ -184,12 +191,13 @@ public abstract class ClientContext {
       }
       credentials = ((GdchCredentials) credentials).createWithGdchAudience(gdchAudienceUri);
       endpoint = audienceString;
+      universeDomain = "googleapis.com";
     } else if (!Strings.isNullOrEmpty(settingsGdchApiAudience)) {
       throw new IllegalArgumentException(
           "GDC-H API audience can only be set when using GdchCredentials");
     } else {
-      endpoint = endpointContext.resolveEndpoint();
-      universeDomain = endpointContext.resolveUniverseDomain();
+      endpoint = endpointContext.getResolvedEndpoint();
+      universeDomain = endpointContext.getResolvedUniverseDomain();
     }
 
     if (settings.getQuotaProjectId() != null && credentials != null) {
@@ -214,7 +222,7 @@ public abstract class ClientContext {
     if (transportChannelProvider.needsCredentials() && credentials != null) {
       transportChannelProvider = transportChannelProvider.withCredentials(credentials);
     }
-    if (transportChannelProvider.needsResolvedEndpoint()) {
+    if (transportChannelProvider.needsEndpoint()) {
       transportChannelProvider = transportChannelProvider.withEndpoint(endpoint);
     }
     TransportChannel transportChannel = transportChannelProvider.getTransportChannel();

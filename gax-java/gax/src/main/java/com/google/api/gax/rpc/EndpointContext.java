@@ -31,30 +31,27 @@ package com.google.api.gax.rpc;
 
 import com.google.api.core.InternalApi;
 import com.google.api.gax.rpc.mtls.MtlsProvider;
-import com.google.auth.Credentials;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
+/** Contains the fields required to resolve the endpoint */
 @InternalApi
 @AutoValue
 public abstract class EndpointContext {
-  public static final String INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE =
-      "The configured universe domain (%s) does not match the universe domain found in the credentials (%s). If you haven't configured the universe domain explicitly, `googleapis.com` is the default.";
-  public static final String UNIVERSE_DOMAIN_UNAVAILABLE_MESSAGE =
-      "Unable to retrieve the Universe Domain";
-  private static final String GOOGLE_DEFAULT_UNIVERSE = "googleapis.com";
-  private static final String DEFAULT_PORT = "443";
-  private static final String ENDPOINT_TEMPLATE = "SERVICE_NAME.UNIVERSE_DOMAIN:PORT";
-
-  public abstract String hostServiceName();
-
+  /**
+   * ClientSettingsEndpoint is the endpoint value set via the ClientSettings/StubSettings classes.
+   */
   @Nullable
   public abstract String clientSettingsEndpoint();
 
+  /**
+   * TransportChannelProviderEndpoint is the endpoint value set via the TransportChannelProvider
+   * class.
+   */
   @Nullable
-  public abstract String transportChannelEndpoint();
+  public abstract String transportChannelProviderEndpoint();
 
   @Nullable
   public abstract String mtlsEndpoint();
@@ -71,85 +68,32 @@ public abstract class EndpointContext {
   public abstract Builder toBuilder();
 
   private String resolvedEndpoint;
-  private String resolvedUniverseDomain;
 
   public static Builder newBuilder() {
-    return new AutoValue_EndpointContext.Builder()
-        .setHostServiceName("")
-        .setSwitchToMtlsEndpointAllowed(false);
+    return new AutoValue_EndpointContext.Builder().setSwitchToMtlsEndpointAllowed(false);
   }
 
   @VisibleForTesting
   void determineEndpoint() throws IOException {
-    if (resolvedEndpoint != null && resolvedUniverseDomain != null) {
-      return;
-    }
     MtlsProvider mtlsProvider = mtlsProvider() == null ? new MtlsProvider() : mtlsProvider();
     String customEndpoint =
-        transportChannelEndpoint() != null ? transportChannelEndpoint() : clientSettingsEndpoint();
-    if (universeDomain() == null && customEndpoint == null) {
-      String defaultEndpoint = buildEndpoint(hostServiceName());
-      resolvedEndpoint =
-          mtlsEndpointResolver(
-              mtlsProvider, defaultEndpoint, mtlsEndpoint(), switchToMtlsEndpointAllowed());
-      resolvedUniverseDomain = GOOGLE_DEFAULT_UNIVERSE;
-    } else if (universeDomain() != null && universeDomain().isEmpty()) {
-      throw new IllegalStateException("Universe Domain cannot be set as an empty string");
-    } else if (universeDomain() != null && !universeDomain().isEmpty() && customEndpoint == null) {
-      resolvedEndpoint =
-          mtlsEndpointResolver(
-              mtlsProvider,
-              buildEndpoint(hostServiceName(), universeDomain(), DEFAULT_PORT),
-              mtlsEndpoint(),
-              switchToMtlsEndpointAllowed());
-      if (resolvedEndpoint.contains("mtls") && !universeDomain().equals(GOOGLE_DEFAULT_UNIVERSE)) {
-        throw new RuntimeException(
-            "mTLS is not supported in any universe other than googleapis.com");
-      } else {
-        resolvedUniverseDomain = universeDomain();
-      }
-    } else if (customEndpoint != null && !customEndpoint.isEmpty()) {
-      if (customEndpoint.contains("localhost")) {
-        resolvedEndpoint = customEndpoint;
-        resolvedUniverseDomain = GOOGLE_DEFAULT_UNIVERSE;
-        return;
-      }
-      if (customEndpoint.contains("http://")) {
-        customEndpoint = customEndpoint.substring(7);
-      } else if (customEndpoint.contains("https://")) {
-        customEndpoint = customEndpoint.substring(8);
-      }
-      // Parse the custom customEndpoint for the universe domain
-      int periodIndex = customEndpoint.indexOf('.');
-      int colonIndex = customEndpoint.indexOf(':');
-      String universeDomain;
-      if (colonIndex != -1) {
-        universeDomain = customEndpoint.substring(periodIndex + 1, colonIndex);
-      } else {
-        universeDomain = customEndpoint.substring(periodIndex + 1);
-      }
-      resolvedEndpoint =
-          mtlsEndpointResolver(
-              mtlsProvider,
-              buildEndpoint(hostServiceName(), universeDomain, DEFAULT_PORT),
-              mtlsEndpoint(),
-              switchToMtlsEndpointAllowed());
-      if (resolvedEndpoint.contains("mtls") && !universeDomain.equals(GOOGLE_DEFAULT_UNIVERSE)) {
-        throw new RuntimeException(
-            "mTLS is not supported in any universe other than googleapis.com");
-      } else {
-        resolvedUniverseDomain = universeDomain;
-      }
-    } else {
-      throw new IllegalStateException("Unable to resolve the endpoint");
-    }
+        transportChannelProviderEndpoint() == null
+            ? clientSettingsEndpoint()
+            : transportChannelProviderEndpoint();
+    resolvedEndpoint =
+        mtlsEndpointResolver(
+            customEndpoint, mtlsEndpoint(), switchToMtlsEndpointAllowed(), mtlsProvider);
   }
 
-  private String mtlsEndpointResolver(
-      MtlsProvider mtlsProvider,
+  // This takes in parameters because determineEndpoint()'s logic will be updated
+  // to pass custom values in.
+  // Follows https://google.aip.dev/auth/4114 for resolving the endpoint
+  @VisibleForTesting
+  String mtlsEndpointResolver(
       String endpoint,
       String mtlsEndpoint,
-      boolean switchToMtlsEndpointAllowed)
+      boolean switchToMtlsEndpointAllowed,
+      MtlsProvider mtlsProvider)
       throws IOException {
     if (switchToMtlsEndpointAllowed && mtlsProvider != null) {
       switch (mtlsProvider.getMtlsEndpointUsagePolicy()) {
@@ -178,20 +122,6 @@ public abstract class EndpointContext {
         .replace("PORT", port);
   }
 
-  public String resolveEndpoint() throws IOException {
-    if (resolvedEndpoint == null) {
-      determineEndpoint();
-    }
-    return resolvedEndpoint;
-  }
-
-  public String resolveUniverseDomain() throws IOException {
-    if (resolvedUniverseDomain == null) {
-      determineEndpoint();
-    }
-    return resolvedUniverseDomain;
-  }
-
   public boolean isValidUniverseDomain(Credentials credentials) throws IOException {
     if (resolvedUniverseDomain == null) {
       determineEndpoint();
@@ -199,14 +129,31 @@ public abstract class EndpointContext {
     return true;
     //    return resolvedUniverseDomain.equals(credentials.getUniverseDomain());
   }
+  
+  /**
+   * The resolved endpoint is the computed endpoint after accounting for the custom endpoints and
+   * mTLS configurations.
+   */
+  public String getResolvedEndpoint() {
+    return resolvedEndpoint;
+  }
+  
+  public String getResolvedUniverseDomain() {
+    return resolvedUniverseDomain;
+  }
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setHostServiceName(String hostServiceName);
-
+    /**
+     * ClientSettingsEndpoint is the endpoint value set via the ClientSettings/StubSettings classes.
+     */
     public abstract Builder setClientSettingsEndpoint(String clientSettingsEndpoint);
 
-    public abstract Builder setTransportChannelEndpoint(String transportChannelEndpoint);
+    /**
+     * TransportChannelProviderEndpoint is the endpoint value set via the TransportChannelProvider
+     * class.
+     */
+    public abstract Builder setTransportChannelProviderEndpoint(String transportChannelEndpoint);
 
     public abstract Builder setMtlsEndpoint(String mtlsEndpoint);
 
@@ -214,9 +161,14 @@ public abstract class EndpointContext {
 
     public abstract Builder setUniverseDomain(String universeDomain);
 
-    @VisibleForTesting
     public abstract Builder setMtlsProvider(MtlsProvider mtlsProvider);
 
-    public abstract EndpointContext build();
+    abstract EndpointContext autoBuild();
+
+    public EndpointContext build() throws IOException {
+      EndpointContext endpointContext = autoBuild();
+      endpointContext.determineEndpoint();
+      return endpointContext;
+    }
   }
 }

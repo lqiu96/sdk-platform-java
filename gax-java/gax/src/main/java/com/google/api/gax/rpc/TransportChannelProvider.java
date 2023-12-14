@@ -144,9 +144,9 @@ public interface TransportChannelProvider {
   String getTransportName();
 
   /**
-   * User set custom endpoint for the Transport Provider
+   * User set custom endpoint for the Transport Channel Provider
    *
-   * <p>This is not the resolved endpoint used by GAPICs
+   * <p>This is the unresolved endpoint used by GAPICs
    */
   default String getEndpoint() {
     return null;
