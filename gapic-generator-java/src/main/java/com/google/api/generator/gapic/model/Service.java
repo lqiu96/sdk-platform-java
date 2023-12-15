@@ -54,7 +54,8 @@ public abstract class Service {
   }
 
   public String hostServiceName() {
-    Preconditions.checkState(!Strings.isNullOrEmpty(defaultHost()), "Default Host is not supplied");
+    // Host Service Name is guaranteed to exist and be non-null and non-empty
+    // Parser will fail if the default host is not supplied
     return parseHostServiceName(defaultHost());
   }
 

@@ -32,6 +32,7 @@ package com.google.api.gax.rpc;
 import com.google.api.core.ApiClock;
 import com.google.api.core.ApiFunction;
 import com.google.api.core.BetaApi;
+import com.google.api.core.InternalApi;
 import com.google.api.core.NanoClock;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.ExecutorProvider;
@@ -70,6 +71,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
   private final HeaderProvider internalHeaderProvider;
   private final TransportChannelProvider transportChannelProvider;
   private final ApiClock clock;
+  private final String serviceName;
   private final String endpoint;
   private final String universeDomain;
   private final String mtlsEndpoint;
@@ -97,6 +99,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     this.headerProvider = builder.headerProvider;
     this.internalHeaderProvider = builder.internalHeaderProvider;
     this.clock = builder.clock;
+    this.serviceName = builder.serviceName;
     this.endpoint = builder.endpoint;
     this.universeDomain = builder.universeDomain;
     this.mtlsEndpoint = builder.mtlsEndpoint;
@@ -139,11 +142,13 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     return clock;
   }
 
-  /**
-   * Returns the endpoint set by the client or the user
-   *
-   * @return Unresolved endpoint
-   */
+  // Intended for Internal Use and Overriden by generated ServiceStubSettings classes.
+  // Meant to be shared between StubSettings and ClientContext.
+  @InternalApi
+  public String getServiceName() {
+    return "";
+  }
+
   public final String getEndpoint() {
     return endpoint;
   }
@@ -228,6 +233,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     private HeaderProvider internalHeaderProvider;
     private TransportChannelProvider transportChannelProvider;
     private ApiClock clock;
+    private String serviceName;
     private String endpoint;
     private String universeDomain;
     private String mtlsEndpoint;
@@ -254,6 +260,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       this.headerProvider = settings.headerProvider;
       this.internalHeaderProvider = settings.internalHeaderProvider;
       this.clock = settings.clock;
+      this.serviceName = settings.serviceName;
       this.endpoint = settings.endpoint;
       this.universeDomain = settings.universeDomain;
       this.mtlsEndpoint = settings.mtlsEndpoint;
@@ -291,6 +298,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         this.headerProvider = new NoHeaderProvider();
         this.internalHeaderProvider = new NoHeaderProvider();
         this.clock = NanoClock.getDefaultClock();
+        this.serviceName = null;
         this.endpoint = null;
         this.universeDomain = null;
         this.mtlsEndpoint = null;
@@ -312,6 +320,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         this.internalHeaderProvider =
             FixedHeaderProvider.create(clientContext.getInternalHeaders());
         this.clock = clientContext.getClock();
+        this.serviceName = clientContext.getServiceName();
         this.endpoint = clientContext.getEndpoint();
         this.universeDomain = clientContext.getUniverseDomain();
         if (this.endpoint != null) {
