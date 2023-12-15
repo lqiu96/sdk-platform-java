@@ -107,8 +107,8 @@ class GrpcClientCalls {
         throw ApiExceptionFactory.createException(
             new Throwable(
                 String.format(
-                    EndpointContext.INVALID_UNIVERSE_DOMAIN_ERROR_MESSAGE,
-                    endpointContext.resolveUniverseDomain(),
+                    "%s %s",
+                    endpointContext.getResolvedUniverseDomain(),
                     // Param should be credentials.getUniverseDomain()
                     "test.com")),
             GrpcStatusCode.of(Status.Code.PERMISSION_DENIED),
@@ -119,9 +119,7 @@ class GrpcClientCalls {
       if (e instanceof Retryable) {
         retryable = (Retryable) e;
         throw ApiExceptionFactory.createException(
-            new Throwable(EndpointContext.UNIVERSE_DOMAIN_UNAVAILABLE_MESSAGE),
-            GrpcStatusCode.of(Status.Code.UNAVAILABLE),
-            retryable.isRetryable());
+            new Throwable(""), GrpcStatusCode.of(Status.Code.UNAVAILABLE), retryable.isRetryable());
       } else {
         throw new RuntimeException(e);
       }

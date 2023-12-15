@@ -97,7 +97,7 @@ public final class GrpcCallContext implements ApiCallContext {
         ApiCallContextOptions.getDefaultOptions(),
         null,
         null,
-        EndpointContext.newBuilder().build());
+        null);
   }
 
   /** Returns an instance with the given channel and {@link CallOptions}. */
@@ -114,7 +114,7 @@ public final class GrpcCallContext implements ApiCallContext {
         ApiCallContextOptions.getDefaultOptions(),
         null,
         null,
-        EndpointContext.newBuilder().build());
+        null);
   }
 
   private GrpcCallContext(
@@ -456,6 +456,9 @@ public final class GrpcCallContext implements ApiCallContext {
     }
 
     EndpointContext newEndpointContext = grpcCallContext.endpointContext;
+    if (newEndpointContext == null) {
+      newEndpointContext = this.endpointContext;
+    }
 
     return new GrpcCallContext(
         newChannel,

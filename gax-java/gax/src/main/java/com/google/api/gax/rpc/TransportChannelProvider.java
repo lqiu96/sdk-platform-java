@@ -151,14 +151,4 @@ public interface TransportChannelProvider {
   default String getEndpoint() {
     return null;
   }
-
-  /**
-   * This is different from {@link #needsEndpoint()} as this determines if the
-   * TransportChannelProvider still needs to resolve the endpoint.
-   *
-   * <p>Used by the ClientContext to resolve the endpoint
-   */
-  default boolean needsResolvedEndpoint() {
-    return false;
-  }
 }

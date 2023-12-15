@@ -213,11 +213,6 @@ public final class InstantiatingHttpJsonChannelProvider implements TransportChan
   }
 
   @Override
-  public boolean needsResolvedEndpoint() {
-    return true;
-  }
-
-  @Override
   public boolean shouldAutoClose() {
     return true;
   }

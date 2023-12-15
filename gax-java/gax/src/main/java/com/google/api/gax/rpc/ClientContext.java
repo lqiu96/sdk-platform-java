@@ -272,7 +272,7 @@ public abstract class ClientContext {
         .setInternalHeaders(ImmutableMap.copyOf(settings.getInternalHeaderProvider().getHeaders()))
         .setClock(clock)
         .setDefaultCallContext(defaultCallContext)
-        .setEndpoint(endpoint)
+        .setEndpoint(settings.getEndpoint())
         .setUniverseDomain(universeDomain)
         .setQuotaProjectId(settings.getQuotaProjectId())
         .setStreamWatchdog(watchdog)

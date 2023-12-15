@@ -31,6 +31,7 @@ package com.google.api.gax.rpc;
 
 import com.google.api.core.InternalApi;
 import com.google.api.gax.rpc.mtls.MtlsProvider;
+import com.google.auth.Credentials;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -68,6 +69,7 @@ public abstract class EndpointContext {
   public abstract Builder toBuilder();
 
   private String resolvedEndpoint;
+  private String resolvedUniverseDomain;
 
   public static Builder newBuilder() {
     return new AutoValue_EndpointContext.Builder().setSwitchToMtlsEndpointAllowed(false);
@@ -111,25 +113,11 @@ public abstract class EndpointContext {
     return endpoint;
   }
 
-  private String buildEndpoint(String hostServiceName) {
-    return buildEndpoint(hostServiceName, GOOGLE_DEFAULT_UNIVERSE, DEFAULT_PORT);
-  }
-
-  private String buildEndpoint(String hostServiceName, String universeDomain, String port) {
-    return ENDPOINT_TEMPLATE
-        .replace("SERVICE_NAME", hostServiceName)
-        .replace("UNIVERSE_DOMAIN", universeDomain)
-        .replace("PORT", port);
-  }
-
   public boolean isValidUniverseDomain(Credentials credentials) throws IOException {
-    if (resolvedUniverseDomain == null) {
-      determineEndpoint();
-    }
     return true;
     //    return resolvedUniverseDomain.equals(credentials.getUniverseDomain());
   }
-  
+
   /**
    * The resolved endpoint is the computed endpoint after accounting for the custom endpoints and
    * mTLS configurations.
@@ -137,7 +125,7 @@ public abstract class EndpointContext {
   public String getResolvedEndpoint() {
     return resolvedEndpoint;
   }
-  
+
   public String getResolvedUniverseDomain() {
     return resolvedUniverseDomain;
   }

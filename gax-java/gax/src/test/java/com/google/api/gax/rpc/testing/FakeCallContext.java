@@ -83,7 +83,7 @@ public class FakeCallContext implements ApiCallContext {
     this.tracer = tracer;
     this.retrySettings = retrySettings;
     this.retryableCodes = retryableCodes == null ? null : ImmutableSet.copyOf(retryableCodes);
-    this.endpointContext = EndpointContext.newBuilder().build();
+    this.endpointContext = endpointContext;
   }
 
   public static FakeCallContext createDefault() {
@@ -98,7 +98,7 @@ public class FakeCallContext implements ApiCallContext {
         null,
         null,
         null,
-        EndpointContext.newBuilder().build());
+        null);
   }
 
   @Override

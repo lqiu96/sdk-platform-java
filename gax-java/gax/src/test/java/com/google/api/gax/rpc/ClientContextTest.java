@@ -693,31 +693,29 @@ public class ClientContextTest {
 
   private static String endpoint = "foo.googleapis.com:443";
   private static String mtlsEndpoint = "foo.mtls.googleapis.com:443";
-  
+
   @Test
   public void testSwitchToMtlsEndpointAllowed() throws IOException {
-    StubSettings settings = new FakeStubSettings.Builder().setHostServiceName("foo").build();
+    StubSettings settings = new FakeStubSettings.Builder().setEndpoint(endpoint).build();
     assertFalse(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint(true));
+    assertEquals(endpoint, settings.getEndpoint());
 
     settings =
         new FakeStubSettings.Builder()
-            .setHostServiceName("foo")
             .setEndpoint(endpoint)
             .setSwitchToMtlsEndpointAllowed(true)
             .build();
     assertTrue(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint(true));
+    assertEquals(endpoint, settings.getEndpoint());
 
     // Test setEndpoint sets the switchToMtlsEndpointAllowed value to false.
     settings =
         new FakeStubSettings.Builder()
-            .setHostServiceName("foo")
             .setSwitchToMtlsEndpointAllowed(true)
             .setEndpoint(endpoint)
             .build();
     assertFalse(settings.getSwitchToMtlsEndpointAllowed());
-    assertEquals(endpoint, settings.getEndpoint(true));
+    assertEquals(endpoint, settings.getEndpoint());
   }
 
   @Test
