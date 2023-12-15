@@ -32,6 +32,12 @@ package com.google.api.gax.httpjson;
 import com.google.api.core.AbstractApiFuture;
 import com.google.api.core.ApiFuture;
 import com.google.api.gax.rpc.ApiCallContext;
+import com.google.api.gax.rpc.ApiExceptionFactory;
+import com.google.api.gax.rpc.EndpointContext;
+import com.google.api.gax.rpc.StatusCode;
+import com.google.auth.Credentials;
+import com.google.auth.Retryable;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.threeten.bp.Duration;
@@ -70,6 +76,33 @@ class HttpJsonClientCalls {
                 .build();
       }
       httpJsonContext = httpJsonContext.withCallOptions(callOptions);
+    }
+
+    EndpointContext endpointContext = httpJsonContext.getEndpointContext();
+    try {
+      Credentials credentials = httpJsonContext.getCallOptions().getCredentials();
+      if (!endpointContext.isValidUniverseDomain(credentials)) {
+        throw ApiExceptionFactory.createException(
+            new Throwable(
+                String.format(
+                    "%s %s",
+                    endpointContext.getResolvedUniverseDomain(),
+                    // Param should be credentials.getUniverseDomain()
+                    "test.com")),
+            HttpJsonStatusCode.of(StatusCode.Code.PERMISSION_DENIED),
+            false);
+      }
+    } catch (IOException e) {
+      Retryable retryable;
+      if (e instanceof Retryable) {
+        retryable = (Retryable) e;
+        throw ApiExceptionFactory.createException(
+            new Throwable(""),
+            HttpJsonStatusCode.of(StatusCode.Code.UNAVAILABLE),
+            retryable.isRetryable());
+      } else {
+        throw new RuntimeException(e);
+      }
     }
 
     // TODO: add headers interceptor logic

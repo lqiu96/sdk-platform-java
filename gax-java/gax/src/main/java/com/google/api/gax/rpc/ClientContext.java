@@ -100,8 +100,15 @@ public abstract class ClientContext {
   @Nonnull
   public abstract Duration getStreamWatchdogCheckInterval();
 
+  // Package-Private scope for internal use only. Shared between StubSettings and ClientContext
+  @Nullable
+  abstract String getServiceName();
+
   @Nullable
   public abstract String getEndpoint();
+
+  @Nullable
+  public abstract String getUniverseDomain();
 
   @Nullable
   public abstract String getQuotaProjectId();
@@ -153,9 +160,23 @@ public abstract class ClientContext {
     final ScheduledExecutorService backgroundExecutor = backgroundExecutorProvider.getExecutor();
 
     Credentials credentials = settings.getCredentialsProvider().getCredentials();
+    EndpointContext endpointContext =
+        EndpointContext.newBuilder()
+            .setClientSettingsEndpoint(settings.getEndpoint())
+            .setTransportChannelProviderEndpoint(
+                settings.getTransportChannelProvider().getEndpoint())
+            .setMtlsEndpoint(settings.getMtlsEndpoint())
+            .setSwitchToMtlsEndpointAllowed(settings.getSwitchToMtlsEndpointAllowed())
+            .build();
+    String endpoint = null;
+    String universeDomain = null;
 
     String settingsGdchApiAudience = settings.getGdchApiAudience();
     if (credentials instanceof GdchCredentials) {
+      if (!Strings.isNullOrEmpty(settings.getUniverseDomain())) {
+        throw new IllegalArgumentException(
+            "Universe domain configuration is incompatible with GDC-H");
+      }
       // We recompute the GdchCredentials with the audience
       String audienceString;
       if (!Strings.isNullOrEmpty(settingsGdchApiAudience)) {
@@ -173,9 +194,14 @@ public abstract class ClientContext {
         throw new IllegalArgumentException("The GDC-H API audience string is not a valid URI", ex);
       }
       credentials = ((GdchCredentials) credentials).createWithGdchAudience(gdchAudienceUri);
+      endpoint = audienceString;
+      universeDomain = "googleapis.com";
     } else if (!Strings.isNullOrEmpty(settingsGdchApiAudience)) {
       throw new IllegalArgumentException(
           "GDC-H API audience can only be set when using GdchCredentials");
+    } else {
+      endpoint = endpointContext.getResolvedEndpoint();
+      universeDomain = endpointContext.getResolvedUniverseDomain();
     }
 
     if (settings.getQuotaProjectId() != null && credentials != null) {
@@ -200,15 +226,6 @@ public abstract class ClientContext {
     if (transportChannelProvider.needsCredentials() && credentials != null) {
       transportChannelProvider = transportChannelProvider.withCredentials(credentials);
     }
-    EndpointContext endpointContext =
-        EndpointContext.newBuilder()
-            .setClientSettingsEndpoint(settings.getEndpoint())
-            .setTransportChannelProviderEndpoint(
-                settings.getTransportChannelProvider().getEndpoint())
-            .setMtlsEndpoint(settings.getMtlsEndpoint())
-            .setSwitchToMtlsEndpointAllowed(settings.getSwitchToMtlsEndpointAllowed())
-            .build();
-    String endpoint = endpointContext.getResolvedEndpoint();
     if (transportChannelProvider.needsEndpoint()) {
       transportChannelProvider = transportChannelProvider.withEndpoint(endpoint);
     }
@@ -219,6 +236,7 @@ public abstract class ClientContext {
     if (credentials != null) {
       defaultCallContext = defaultCallContext.withCredentials(credentials);
     }
+    defaultCallContext = defaultCallContext.withEndpointContext(endpointContext);
 
     WatchdogProvider watchdogProvider = settings.getStreamWatchdogProvider();
     @Nullable Watchdog watchdog = null;
@@ -258,7 +276,9 @@ public abstract class ClientContext {
         .setInternalHeaders(ImmutableMap.copyOf(settings.getInternalHeaderProvider().getHeaders()))
         .setClock(clock)
         .setDefaultCallContext(defaultCallContext)
+        .setServiceName(settings.getServiceName())
         .setEndpoint(settings.getEndpoint())
+        .setUniverseDomain(universeDomain)
         .setQuotaProjectId(settings.getQuotaProjectId())
         .setStreamWatchdog(watchdog)
         .setStreamWatchdogCheckInterval(settings.getStreamWatchdogCheckInterval())
@@ -323,7 +343,12 @@ public abstract class ClientContext {
 
     public abstract Builder setDefaultCallContext(ApiCallContext defaultCallContext);
 
+    // Package-Private scope for internal use only. Shared between StubSettings and ClientContext
+    abstract Builder setServiceName(String serviceName);
+
     public abstract Builder setEndpoint(String endpoint);
+
+    public abstract Builder setUniverseDomain(String universeDomain);
 
     public abstract Builder setQuotaProjectId(String QuotaProjectId);
 

@@ -199,8 +199,14 @@ public final class InstantiatingGrpcChannelProvider implements TransportChannelP
    */
   @Override
   public TransportChannelProvider withEndpoint(String endpoint) {
-    validateEndpoint(endpoint);
-    return toBuilder().setEndpoint(endpoint).build();
+    String grpcEndpoint = endpoint;
+    if (grpcEndpoint.contains("http://")) {
+      grpcEndpoint = grpcEndpoint.substring(7);
+    } else if (grpcEndpoint.contains("https://")) {
+      grpcEndpoint = grpcEndpoint.substring(8);
+    }
+    validateEndpoint(grpcEndpoint);
+    return toBuilder().setEndpoint(grpcEndpoint).build();
   }
 
   /** @deprecated Please modify pool settings via {@link #toBuilder()} */

@@ -32,6 +32,7 @@ package com.google.api.gax.rpc;
 import com.google.api.core.ApiClock;
 import com.google.api.core.ApiFunction;
 import com.google.api.core.BetaApi;
+import com.google.api.core.InternalApi;
 import com.google.api.core.NanoClock;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.ExecutorProvider;
@@ -70,7 +71,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
   private final HeaderProvider internalHeaderProvider;
   private final TransportChannelProvider transportChannelProvider;
   private final ApiClock clock;
+  private final String serviceName;
   private final String endpoint;
+  private final String universeDomain;
   private final String mtlsEndpoint;
   private final String quotaProjectId;
   @Nullable private final String gdchApiAudience;
@@ -78,7 +81,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
   @Nonnull private final Duration streamWatchdogCheckInterval;
   @Nonnull private final ApiTracerFactory tracerFactory;
   // Track if deprecated setExecutorProvider is called
-  private boolean deprecatedExecutorProviderSet;
+  private final boolean deprecatedExecutorProviderSet;
 
   /**
    * Indicate when creating transport whether it is allowed to use mTLS endpoint instead of the
@@ -96,7 +99,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     this.headerProvider = builder.headerProvider;
     this.internalHeaderProvider = builder.internalHeaderProvider;
     this.clock = builder.clock;
+    this.serviceName = builder.serviceName;
     this.endpoint = builder.endpoint;
+    this.universeDomain = builder.universeDomain;
     this.mtlsEndpoint = builder.mtlsEndpoint;
     this.switchToMtlsEndpointAllowed = builder.switchToMtlsEndpointAllowed;
     this.quotaProjectId = builder.quotaProjectId;
@@ -137,8 +142,24 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     return clock;
   }
 
+  // Intended for Internal Use and Overriden by generated ServiceStubSettings classes.
+  // Meant to be shared between StubSettings and ClientContext.
+  @InternalApi
+  public String getServiceName() {
+    return "";
+  }
+
   public final String getEndpoint() {
     return endpoint;
+  }
+
+  /**
+   * Returns the Universe Domain set by the user
+   *
+   * @return Unresolved endpoint
+   */
+  public final String getUniverseDomain() {
+    return universeDomain;
   }
 
   public final String getMtlsEndpoint() {
@@ -190,6 +211,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         .add("internalHeaderProvider", internalHeaderProvider)
         .add("clock", clock)
         .add("endpoint", endpoint)
+        .add("universeDomain", universeDomain)
         .add("mtlsEndpoint", mtlsEndpoint)
         .add("switchToMtlsEndpointAllowed", switchToMtlsEndpointAllowed)
         .add("quotaProjectId", quotaProjectId)
@@ -211,7 +233,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
     private HeaderProvider internalHeaderProvider;
     private TransportChannelProvider transportChannelProvider;
     private ApiClock clock;
+    private String serviceName;
     private String endpoint;
+    private String universeDomain;
     private String mtlsEndpoint;
     private String quotaProjectId;
     @Nullable private String gdchApiAudience;
@@ -236,7 +260,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       this.headerProvider = settings.headerProvider;
       this.internalHeaderProvider = settings.internalHeaderProvider;
       this.clock = settings.clock;
+      this.serviceName = settings.serviceName;
       this.endpoint = settings.endpoint;
+      this.universeDomain = settings.universeDomain;
       this.mtlsEndpoint = settings.mtlsEndpoint;
       this.switchToMtlsEndpointAllowed = settings.switchToMtlsEndpointAllowed;
       this.quotaProjectId = settings.quotaProjectId;
@@ -272,7 +298,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         this.headerProvider = new NoHeaderProvider();
         this.internalHeaderProvider = new NoHeaderProvider();
         this.clock = NanoClock.getDefaultClock();
+        this.serviceName = null;
         this.endpoint = null;
+        this.universeDomain = null;
         this.mtlsEndpoint = null;
         this.quotaProjectId = null;
         this.streamWatchdogProvider = InstantiatingWatchdogProvider.create();
@@ -292,7 +320,9 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
         this.internalHeaderProvider =
             FixedHeaderProvider.create(clientContext.getInternalHeaders());
         this.clock = clientContext.getClock();
+        this.serviceName = clientContext.getServiceName();
         this.endpoint = clientContext.getEndpoint();
+        this.universeDomain = clientContext.getUniverseDomain();
         if (this.endpoint != null) {
           this.mtlsEndpoint = this.endpoint.replace("googleapis.com", "mtls.googleapis.com");
         }
@@ -423,6 +453,11 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       return self();
     }
 
+    public B setUniverseDomain(String universeDomain) {
+      this.universeDomain = universeDomain;
+      return self();
+    }
+
     protected B setSwitchToMtlsEndpointAllowed(boolean switchToMtlsEndpointAllowed) {
       this.switchToMtlsEndpointAllowed = switchToMtlsEndpointAllowed;
       return self();
@@ -518,6 +553,10 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
       return endpoint;
     }
 
+    public String getUniverseDomain() {
+      return universeDomain;
+    }
+
     public String getMtlsEndpoint() {
       return mtlsEndpoint;
     }
@@ -564,6 +603,7 @@ public abstract class StubSettings<SettingsT extends StubSettings<SettingsT>> {
           .add("internalHeaderProvider", internalHeaderProvider)
           .add("clock", clock)
           .add("endpoint", endpoint)
+          .add("universeDomain", universeDomain)
           .add("mtlsEndpoint", mtlsEndpoint)
           .add("switchToMtlsEndpointAllowed", switchToMtlsEndpointAllowed)
           .add("quotaProjectId", quotaProjectId)

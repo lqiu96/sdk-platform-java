@@ -295,6 +295,7 @@ public class ClientContextTest {
     builder.setWatchdogProvider(FixedWatchdogProvider.create(watchdog));
     builder.setWatchdogCheckInterval(watchdogCheckInterval);
     builder.setClock(clock);
+    builder.setEndpoint(endpoint);
 
     HeaderProvider headerProvider = Mockito.mock(HeaderProvider.class);
     Mockito.when(headerProvider.getHeaders()).thenReturn(ImmutableMap.of("k1", "v1"));
@@ -377,6 +378,7 @@ public class ClientContextTest {
     Mockito.when(internalHeaderProvider.getHeaders()).thenReturn(ImmutableMap.of("k2", "v2"));
     builder.setHeaderProvider(headerProvider);
     builder.setInternalHeaderProvider(internalHeaderProvider);
+    builder.setEndpoint(endpoint);
 
     ClientContext context = ClientContext.create(builder.build());
     List<BackgroundResource> resources = context.getBackgroundResources();
@@ -406,6 +408,7 @@ public class ClientContextTest {
     builder.setHeaderProvider(headerProvider);
     builder.setInternalHeaderProvider(internalHeaderProvider);
     builder.setQuotaProjectId(QUOTA_PROJECT_ID_FROM_SETTINGS);
+    builder.setEndpoint(endpoint);
 
     ClientContext context = ClientContext.create(builder.build());
     List<BackgroundResource> resources = context.getBackgroundResources();
@@ -455,6 +458,7 @@ public class ClientContextTest {
     builder.setHeaderProvider(headerProvider);
     builder.setInternalHeaderProvider(internalHeaderProvider);
     builder.setQuotaProjectId(QUOTA_PROJECT_ID_FROM_SETTINGS);
+    builder.setEndpoint(endpoint);
 
     ClientContext context = ClientContext.create(builder.build());
     List<BackgroundResource> resources = context.getBackgroundResources();
@@ -487,6 +491,7 @@ public class ClientContextTest {
         FixedCredentialsProvider.create(Mockito.mock(Credentials.class)));
     builder.setHeaderProvider(headerProvider);
     builder.setInternalHeaderProvider(internalHeaderProvider);
+    builder.setEndpoint(endpoint);
 
     ClientContext context = ClientContext.create(builder.build());
     List<BackgroundResource> resources = context.getBackgroundResources();
@@ -530,6 +535,7 @@ public class ClientContextTest {
     builder.setHeaderProvider(headerProviderWithQuota);
     builder.setInternalHeaderProvider(internalHeaderProvider);
     builder.setQuotaProjectId(QUOTA_PROJECT_ID_FROM_CREDENTIALS_VALUE);
+    builder.setEndpoint(endpoint);
 
     ClientContext clientContext = ClientContext.create(builder.build());
     assertThat(clientContext.getCredentials().getRequestMetadata().size())
@@ -564,6 +570,7 @@ public class ClientContextTest {
         });
     builder.setHeaderProvider(headerProviderWithQuota);
     builder.setInternalHeaderProvider(internalHeaderProvider);
+    builder.setEndpoint(endpoint);
 
     ClientContext clientContext = ClientContext.create(builder.build());
     assertThat(clientContext.getCredentials().getRequestMetadata(null)).isEqualTo(metaData);
@@ -587,6 +594,7 @@ public class ClientContextTest {
     final FakeClientSettings.Builder settingsBuilder = new FakeClientSettings.Builder();
 
     settingsBuilder
+        .setEndpoint(endpoint)
         .setTransportChannelProvider(transportProvider)
         .setCredentialsProvider(NoCredentialsProvider.create())
         .setQuotaProjectId(QUOTA_PROJECT_ID);
@@ -607,6 +615,7 @@ public class ClientContextTest {
 
     ClientSettings.Builder builder =
         new FakeClientSettings.Builder()
+            .setEndpoint(endpoint)
             .setExecutorProvider(
                 FixedExecutorProvider.create(Mockito.mock(ScheduledExecutorService.class)))
             .setTransportChannelProvider(transportChannelProvider)
@@ -635,6 +644,7 @@ public class ClientContextTest {
 
     ClientSettings.Builder builder =
         new FakeClientSettings.Builder()
+            .setEndpoint(endpoint)
             .setExecutorProvider(
                 FixedExecutorProvider.create(Mockito.mock(ScheduledExecutorService.class)))
             .setTransportChannelProvider(transportChannelProvider)
@@ -671,6 +681,7 @@ public class ClientContextTest {
 
     builder.setHeaderProvider(FixedHeaderProvider.create("user-agent", "user-supplied-agent"));
     builder.setInternalHeaderProvider(FixedHeaderProvider.create("user-agent", "internal-agent"));
+    builder.setEndpoint(endpoint);
 
     ClientContext clientContext = ClientContext.create(builder.build());
     FakeTransportChannel transportChannel =
@@ -680,8 +691,8 @@ public class ClientContextTest {
         .containsEntry("user-agent", "user-supplied-agent internal-agent");
   }
 
-  private static String endpoint = "https://foo.googleapis.com";
-  private static String mtlsEndpoint = "https://foo.mtls.googleapis.com";
+  private static String endpoint = "foo.googleapis.com:443";
+  private static String mtlsEndpoint = "foo.mtls.googleapis.com:443";
 
   @Test
   public void testSwitchToMtlsEndpointAllowed() throws IOException {
@@ -720,6 +731,7 @@ public class ClientContextTest {
 
     ClientSettings.Builder builder =
         new FakeClientSettings.Builder()
+            .setEndpoint(endpoint)
             .setTransportChannelProvider(transportChannelProvider)
             .setCredentialsProvider(
                 FixedCredentialsProvider.create(Mockito.mock(GoogleCredentials.class)));

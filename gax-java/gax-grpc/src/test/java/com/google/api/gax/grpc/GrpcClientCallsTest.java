@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 
 import com.google.api.gax.grpc.testing.FakeChannelFactory;
 import com.google.api.gax.grpc.testing.FakeServiceGrpc;
+import com.google.api.gax.rpc.EndpointContext;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Truth;
 import com.google.type.Color;
@@ -51,15 +52,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.threeten.bp.Duration;
 
 public class GrpcClientCallsTest {
+
+  private static GrpcCallContext defaultCallContext;
+
+  @BeforeClass
+  public static void setUp() throws IOException {
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
+    defaultCallContext = GrpcCallContext.createDefault().withEndpointContext(endpointContext);
+  }
+
   @Test
   public void testAffinity() throws IOException {
     MethodDescriptor<Color, Money> descriptor = FakeServiceGrpc.METHOD_RECOGNIZE;
+
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
 
     @SuppressWarnings("unchecked")
     ClientCall<Color, Money> clientCall0 = Mockito.mock(ClientCall.class);
@@ -78,7 +93,7 @@ public class GrpcClientCallsTest {
         ChannelPool.create(
             ChannelPoolSettings.staticallySized(2),
             new FakeChannelFactory(Arrays.asList(channel0, channel1)));
-    GrpcCallContext context = GrpcCallContext.createDefault().withChannel(pool);
+    GrpcCallContext context = defaultCallContext.withChannel(pool);
 
     ClientCall<Color, Money> gotCallA =
         GrpcClientCalls.newCall(descriptor, context.withChannelAffinity(0));
@@ -92,7 +107,7 @@ public class GrpcClientCallsTest {
   }
 
   @Test
-  public void testExtraHeaders() {
+  public void testExtraHeaders() throws IOException {
     Metadata emptyHeaders = new Metadata();
     final Map<String, List<String>> extraHeaders = new HashMap<>();
     extraHeaders.put(
@@ -127,13 +142,16 @@ public class GrpcClientCallsTest {
     Mockito.when(mockChannel.newCall(Mockito.eq(descriptor), Mockito.<CallOptions>any()))
         .thenReturn(mockClientCall);
 
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
+
     GrpcCallContext context =
-        GrpcCallContext.createDefault().withChannel(mockChannel).withExtraHeaders(extraHeaders);
+        defaultCallContext.withChannel(mockChannel).withExtraHeaders(extraHeaders);
     GrpcClientCalls.newCall(descriptor, context).start(mockListener, emptyHeaders);
   }
 
   @Test
-  public void testTimeoutToDeadlineConversion() {
+  public void testTimeoutToDeadlineConversion() throws IOException {
     MethodDescriptor<Color, Money> descriptor = FakeServiceGrpc.METHOD_RECOGNIZE;
 
     @SuppressWarnings("unchecked")
@@ -152,8 +170,10 @@ public class GrpcClientCallsTest {
     Duration timeout = Duration.ofSeconds(10);
     Deadline minExpectedDeadline = Deadline.after(timeout.getSeconds(), TimeUnit.SECONDS);
 
-    GrpcCallContext context =
-        GrpcCallContext.createDefault().withChannel(mockChannel).withTimeout(timeout);
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
+
+    GrpcCallContext context = defaultCallContext.withChannel(mockChannel).withTimeout(timeout);
 
     GrpcClientCalls.newCall(descriptor, context).start(mockListener, new Metadata());
 
@@ -164,7 +184,7 @@ public class GrpcClientCallsTest {
   }
 
   @Test
-  public void testTimeoutAfterDeadline() {
+  public void testTimeoutAfterDeadline() throws IOException {
     MethodDescriptor<Color, Money> descriptor = FakeServiceGrpc.METHOD_RECOGNIZE;
 
     @SuppressWarnings("unchecked")
@@ -184,8 +204,11 @@ public class GrpcClientCallsTest {
     Deadline priorDeadline = Deadline.after(5, TimeUnit.SECONDS);
     Duration timeout = Duration.ofSeconds(10);
 
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
+
     GrpcCallContext context =
-        GrpcCallContext.createDefault()
+        defaultCallContext
             .withChannel(mockChannel)
             .withCallOptions(CallOptions.DEFAULT.withDeadline(priorDeadline))
             .withTimeout(timeout);
@@ -197,7 +220,7 @@ public class GrpcClientCallsTest {
   }
 
   @Test
-  public void testTimeoutBeforeDeadline() {
+  public void testTimeoutBeforeDeadline() throws IOException {
     MethodDescriptor<Color, Money> descriptor = FakeServiceGrpc.METHOD_RECOGNIZE;
 
     @SuppressWarnings("unchecked")
@@ -218,8 +241,11 @@ public class GrpcClientCallsTest {
     Deadline subsequentDeadline = Deadline.after(10, TimeUnit.SECONDS);
     Deadline minExpectedDeadline = Deadline.after(timeout.getSeconds(), TimeUnit.SECONDS);
 
+    EndpointContext endpointContext = Mockito.mock(EndpointContext.class);
+    Mockito.when(endpointContext.isValidUniverseDomain(Mockito.any())).thenReturn(true);
+
     GrpcCallContext context =
-        GrpcCallContext.createDefault()
+        defaultCallContext
             .withChannel(mockChannel)
             .withCallOptions(CallOptions.DEFAULT.withDeadline(subsequentDeadline))
             .withTimeout(timeout);

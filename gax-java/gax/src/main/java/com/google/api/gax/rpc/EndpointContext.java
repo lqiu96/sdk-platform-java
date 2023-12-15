@@ -31,6 +31,7 @@ package com.google.api.gax.rpc;
 
 import com.google.api.core.InternalApi;
 import com.google.api.gax.rpc.mtls.MtlsProvider;
+import com.google.auth.Credentials;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -40,6 +41,14 @@ import javax.annotation.Nullable;
 @InternalApi
 @AutoValue
 public abstract class EndpointContext {
+  /**
+   * ServiceName is host URI for Google Cloud Services. It follows the format of
+   * `{ServiceName}.googleapis.com`. For example, speech.googleapis.com would have a ServiceName of
+   * speech and cloudasset.googleapis.com would have a ServiceName of cloudasset.
+   */
+  @Nullable
+  public abstract String serviceName();
+
   /**
    * ClientSettingsEndpoint is the endpoint value set via the ClientSettings/StubSettings classes.
    */
@@ -59,11 +68,16 @@ public abstract class EndpointContext {
   public abstract boolean switchToMtlsEndpointAllowed();
 
   @Nullable
+  public abstract String universeDomain();
+
+  @VisibleForTesting
+  @Nullable
   public abstract MtlsProvider mtlsProvider();
 
   public abstract Builder toBuilder();
 
   private String resolvedEndpoint;
+  private String resolvedUniverseDomain;
 
   public static Builder newBuilder() {
     return new AutoValue_EndpointContext.Builder().setSwitchToMtlsEndpointAllowed(false);
@@ -107,6 +121,11 @@ public abstract class EndpointContext {
     return endpoint;
   }
 
+  public boolean isValidUniverseDomain(Credentials credentials) throws IOException {
+    return true;
+    //    return resolvedUniverseDomain.equals(credentials.getUniverseDomain());
+  }
+
   /**
    * The resolved endpoint is the computed endpoint after accounting for the custom endpoints and
    * mTLS configurations.
@@ -115,8 +134,19 @@ public abstract class EndpointContext {
     return resolvedEndpoint;
   }
 
+  public String getResolvedUniverseDomain() {
+    return resolvedUniverseDomain;
+  }
+
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * ServiceName is host URI for Google Cloud Services. It follows the format of
+     * `{ServiceName}.googleapis.com`. For example, speech.googleapis.com would have a ServiceName
+     * of speech and cloudasset.googleapis.com would have a ServiceName of cloudasset.
+     */
+    public abstract Builder setServiceName(String serviceName);
+
     /**
      * ClientSettingsEndpoint is the endpoint value set via the ClientSettings/StubSettings classes.
      */
@@ -131,6 +161,8 @@ public abstract class EndpointContext {
     public abstract Builder setMtlsEndpoint(String mtlsEndpoint);
 
     public abstract Builder setSwitchToMtlsEndpointAllowed(boolean switchToMtlsEndpointAllowed);
+
+    public abstract Builder setUniverseDomain(String universeDomain);
 
     public abstract Builder setMtlsProvider(MtlsProvider mtlsProvider);
 

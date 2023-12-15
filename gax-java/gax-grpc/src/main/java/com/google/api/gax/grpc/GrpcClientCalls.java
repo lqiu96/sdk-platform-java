@@ -34,7 +34,11 @@ import com.google.api.core.AbstractApiFuture;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.BetaApi;
 import com.google.api.gax.rpc.ApiCallContext;
+import com.google.api.gax.rpc.ApiExceptionFactory;
+import com.google.api.gax.rpc.EndpointContext;
 import com.google.api.gax.tracing.ApiTracer.Scope;
+import com.google.auth.Credentials;
+import com.google.auth.Retryable;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -45,6 +49,7 @@ import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import io.grpc.stub.MetadataUtils;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,6 +98,31 @@ class GrpcClientCalls {
       ClientInterceptor interceptor =
           MetadataUtils.newAttachHeadersInterceptor(grpcContext.getMetadata());
       channel = ClientInterceptors.intercept(channel, interceptor);
+    }
+
+    EndpointContext endpointContext = grpcContext.getEndpointContext();
+    try {
+      Credentials credentials = grpcContext.getCredentials();
+      if (!endpointContext.isValidUniverseDomain(credentials)) {
+        throw ApiExceptionFactory.createException(
+            new Throwable(
+                String.format(
+                    "%s %s",
+                    endpointContext.getResolvedUniverseDomain(),
+                    // Param should be credentials.getUniverseDomain()
+                    "test.com")),
+            GrpcStatusCode.of(Status.Code.PERMISSION_DENIED),
+            false);
+      }
+    } catch (IOException e) {
+      Retryable retryable;
+      if (e instanceof Retryable) {
+        retryable = (Retryable) e;
+        throw ApiExceptionFactory.createException(
+            new Throwable(""), GrpcStatusCode.of(Status.Code.UNAVAILABLE), retryable.isRetryable());
+      } else {
+        throw new RuntimeException(e);
+      }
     }
 
     try (Scope ignored = grpcContext.getTracer().inScope()) {
