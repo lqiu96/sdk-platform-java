@@ -95,7 +95,6 @@ import org.threeten.bp.Duration;
  */
 @Generated("by gapic-generator-java")
 public class ConnectionServiceStubSettings extends StubSettings<ConnectionServiceStubSettings> {
-  private static final String HOST_SERVICE_NAME = "apigeeconnect";
   /** The default scopes of the service. */
   private static final ImmutableList<String> DEFAULT_SERVICE_SCOPES =
       ImmutableList.<String>builder().add("https://www.googleapis.com/auth/cloud-platform").build();
@@ -350,9 +349,9 @@ public class ConnectionServiceStubSettings extends StubSettings<ConnectionServic
       builder.setTransportChannelProvider(defaultTransportChannelProvider());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultApiClientHeaderProviderBuilder().build());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
-      builder.setHostServiceName(HOST_SERVICE_NAME);
 
       return initDefaults(builder);
     }
@@ -363,9 +362,9 @@ public class ConnectionServiceStubSettings extends StubSettings<ConnectionServic
       builder.setTransportChannelProvider(defaultHttpJsonTransportProviderBuilder().build());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultHttpJsonApiClientHeaderProviderBuilder().build());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
-      builder.setHostServiceName(HOST_SERVICE_NAME);
 
       return initDefaults(builder);
     }

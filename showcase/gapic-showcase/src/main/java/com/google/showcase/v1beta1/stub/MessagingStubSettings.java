@@ -131,7 +131,6 @@ import org.threeten.bp.Duration;
 @BetaApi
 @Generated("by gapic-generator-java")
 public class MessagingStubSettings extends StubSettings<MessagingStubSettings> {
-  private static final String HOST_SERVICE_NAME = "";
   /** The default scopes of the service. */
   private static final ImmutableList<String> DEFAULT_SERVICE_SCOPES =
       ImmutableList.<String>builder().build();
@@ -733,9 +732,9 @@ public class MessagingStubSettings extends StubSettings<MessagingStubSettings> {
       builder.setTransportChannelProvider(defaultTransportChannelProvider());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultApiClientHeaderProviderBuilder().build());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
-      builder.setHostServiceName(HOST_SERVICE_NAME);
 
       return initDefaults(builder);
     }
@@ -746,9 +745,9 @@ public class MessagingStubSettings extends StubSettings<MessagingStubSettings> {
       builder.setTransportChannelProvider(defaultHttpJsonTransportProviderBuilder().build());
       builder.setCredentialsProvider(defaultCredentialsProviderBuilder().build());
       builder.setInternalHeaderProvider(defaultHttpJsonApiClientHeaderProviderBuilder().build());
+      builder.setEndpoint(getDefaultEndpoint());
       builder.setMtlsEndpoint(getDefaultMtlsEndpoint());
       builder.setSwitchToMtlsEndpointAllowed(true);
-      builder.setHostServiceName(HOST_SERVICE_NAME);
 
       return initDefaults(builder);
     }

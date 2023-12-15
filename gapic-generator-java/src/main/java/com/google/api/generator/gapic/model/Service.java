@@ -16,7 +16,6 @@ package com.google.api.generator.gapic.model;
 
 import com.google.api.generator.engine.ast.TypeNode;
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
