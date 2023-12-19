@@ -17,6 +17,7 @@
 package com.google.cloud;
 
 import com.google.api.core.InternalApi;
+import com.google.auth.Retryable;
 import com.google.cloud.ExceptionHandler.Interceptor;
 
 /**
@@ -39,13 +40,15 @@ public abstract class BaseService<OptionsT extends ServiceOptions<?, OptionsT>>
 
         @Override
         public RetryResult beforeEval(Exception exception) {
+          boolean retryable = false;
           if (exception instanceof BaseServiceException) {
-            boolean retriable = ((BaseServiceException) exception).isRetryable();
-            return retriable
-                ? Interceptor.RetryResult.RETRY
-                : Interceptor.RetryResult.CONTINUE_EVALUATION;
+            retryable = ((BaseServiceException) exception).isRetryable();
+          } else if (exception instanceof Retryable) {
+            retryable = ((Retryable) exception).isRetryable();
           }
-          return Interceptor.RetryResult.CONTINUE_EVALUATION;
+          return retryable
+              ? Interceptor.RetryResult.RETRY
+              : Interceptor.RetryResult.CONTINUE_EVALUATION;
         }
       };
   public static final ExceptionHandler EXCEPTION_HANDLER =
