@@ -86,8 +86,7 @@ public class HttpJsonCallContextTest {
 
     HttpJsonCallContext context =
         HttpJsonCallContext.createDefault()
-            .withTransportChannel(
-                HttpJsonTransportChannel.newBuilder().setManagedChannel(channel).build());
+            .withTransportChannel(HttpJsonTransportChannel.create(channel));
     Truth.assertThat(context.getChannel()).isSameInstanceAs(channel);
   }
 

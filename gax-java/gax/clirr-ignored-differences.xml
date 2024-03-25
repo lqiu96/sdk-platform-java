@@ -42,4 +42,14 @@
     <className>com/google/api/gax/rpc/ApiCallContext</className>
     <method>* validateUniverseDomain()</method>
   </difference>
+  <difference>
+    <differenceType>7012</differenceType>
+    <className>com/google/api/gax/rpc/TransportChannel</className>
+    <method>* getConfigurations()</method>
+  </difference>
+  <difference>
+    <differenceType>7012</differenceType>
+    <className>com/google/api/gax/tracing/ApiTracerFactory</className>
+    <method>* addAttributes(*)</method>
+  </difference>
 </differences>

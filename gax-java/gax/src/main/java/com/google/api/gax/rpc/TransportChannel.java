@@ -31,6 +31,7 @@ package com.google.api.gax.rpc;
 
 import com.google.api.core.InternalExtensionOnly;
 import com.google.api.gax.core.BackgroundResource;
+import java.util.Map;
 
 /** Class whose instances can issue RPCs on a particular transport. */
 @InternalExtensionOnly
@@ -47,4 +48,6 @@ public interface TransportChannel extends BackgroundResource {
    * Returns an empty {@link ApiCallContext} that is compatible with this {@code TransportChannel}.
    */
   ApiCallContext getEmptyCallContext();
+
+  Map<String, String> getConfigurations();
 }

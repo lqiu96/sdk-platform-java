@@ -31,6 +31,10 @@ package com.google.api.gax.tracing;
 
 import com.google.api.core.BetaApi;
 import com.google.api.core.InternalApi;
+import com.google.common.collect.ImmutableSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link ApiTracerFactory} to build instances of {@link MetricsTracer}.
@@ -45,13 +49,44 @@ import com.google.api.core.InternalApi;
 public class MetricsTracerFactory implements ApiTracerFactory {
   protected MetricsRecorder metricsRecorder;
 
+  private final Set<MetricFlags> metricFlagsSet;
+
+  private final Map<String, String> additionalDefaultAttributes;
+
   public MetricsTracerFactory(MetricsRecorder metricsRecorder) {
+    this(metricsRecorder, ImmutableSet.of());
+  }
+
+  public MetricsTracerFactory(MetricsRecorder metricsRecorder, Set<MetricFlags> metricFlagsSet) {
     this.metricsRecorder = metricsRecorder;
+    this.metricFlagsSet = metricFlagsSet;
+    this.additionalDefaultAttributes = new HashMap<>();
   }
 
   @Override
   public ApiTracer newTracer(ApiTracer parent, SpanName spanName, OperationType operationType) {
-    return new MetricsTracer(
-        MethodName.of(spanName.getClientName(), spanName.getMethodName()), metricsRecorder);
+    MetricsTracer metricsTracer =
+        new MetricsTracer(
+            MethodName.of(spanName.getClientName(), spanName.getMethodName()), metricsRecorder);
+    for (Map.Entry<String, String> additionalDefaultAttribute :
+        additionalDefaultAttributes.entrySet()) {
+      metricsTracer.addAttributes(
+          additionalDefaultAttribute.getKey(), additionalDefaultAttribute.getValue());
+    }
+    return metricsTracer;
+  }
+
+  @Override
+  public void addAttributes(Map<String, String> attributes) {
+    for (Map.Entry<String, String> attributeEntry : attributes.entrySet()) {
+      String attribute = attributeEntry.getKey();
+      for (MetricFlags metricFlags : metricFlagsSet) {
+        for (MetricAttribute metricAttribute : metricFlags.getOtelAttributeKey()) {
+          if (metricAttribute.getAttribute().equals(attribute)) {
+            additionalDefaultAttributes.put(attributeEntry.getKey(), attributeEntry.getValue());
+          }
+        }
+      }
+    }
   }
 }

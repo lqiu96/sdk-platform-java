@@ -35,6 +35,8 @@ import com.google.api.gax.rpc.TransportChannel;
 import com.google.auto.value.AutoValue;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /** Implementation of TransportChannel based on gRPC. */
@@ -100,16 +102,18 @@ public abstract class GrpcTransportChannel implements TransportChannel {
   }
 
   public static Builder newBuilder() {
-    return new AutoValue_GrpcTransportChannel.Builder();
+    return new AutoValue_GrpcTransportChannel.Builder().setConfigurations(new HashMap<>());
   }
 
   public static GrpcTransportChannel create(ManagedChannel channel) {
-    return newBuilder().setManagedChannel(channel).build();
+    return newBuilder().setManagedChannel(channel).setConfigurations(new HashMap<>()).build();
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setManagedChannel(ManagedChannel value);
+
+    abstract Builder setConfigurations(Map<String, String> configurations);
 
     public abstract GrpcTransportChannel build();
   }

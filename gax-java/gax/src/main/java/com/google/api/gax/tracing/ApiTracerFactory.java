@@ -31,6 +31,9 @@ package com.google.api.gax.tracing;
 
 import com.google.api.core.InternalApi;
 import com.google.api.core.InternalExtensionOnly;
+import com.google.common.collect.ImmutableSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A factory to create new instances of {@link ApiTracer}s.
@@ -53,6 +56,36 @@ public interface ApiTracerFactory {
     BidiStreaming
   }
 
+  enum MetricFlags {
+    DIRECTPATH(
+        ImmutableSet.of(MetricAttribute.DIRECTPATH_ENABLED, MetricAttribute.DIRECTPATH_USED));
+
+    private final Set<MetricAttribute> otelAttributeKey;
+
+    MetricFlags(Set<MetricAttribute> otelAttributeKey) {
+      this.otelAttributeKey = otelAttributeKey;
+    }
+
+    public Set<MetricAttribute> getOtelAttributeKey() {
+      return otelAttributeKey;
+    }
+  }
+
+  enum MetricAttribute {
+    DIRECTPATH_ENABLED("directpath_enabled"),
+    DIRECTPATH_USED("directpath_used");
+
+    private final String attribute;
+
+    MetricAttribute(String attribute) {
+      this.attribute = attribute;
+    }
+
+    public String getAttribute() {
+      return attribute;
+    }
+  }
+
   /**
    * Create a new {@link ApiTracer} that will be a child of the current context.
    *
@@ -61,4 +94,6 @@ public interface ApiTracerFactory {
    * @param operationType the type of operation that the tracer will trace
    */
   ApiTracer newTracer(ApiTracer parent, SpanName spanName, OperationType operationType);
+
+  default void addAttributes(Map<String, String> attributes) {}
 }
