@@ -37,8 +37,10 @@ import com.google.api.gax.rpc.FixedHeaderProvider;
 import com.google.api.gax.rpc.HeaderProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.api.gax.rpc.mtls.MtlsProvider;
+import com.google.api.gax.tracing.ApiTracerFactory;
 import com.google.auth.Credentials;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -203,7 +205,12 @@ public final class InstantiatingHttpJsonChannelProvider implements TransportChan
       }
     }
 
-    return HttpJsonTransportChannel.newBuilder().setManagedChannel(channel).build();
+    return HttpJsonTransportChannel.newBuilder()
+        .setManagedChannel(channel)
+        .setConfigurations(
+            ImmutableMap.of(
+                ApiTracerFactory.MetricAttribute.DIRECTPATH_ENABLED.getAttribute(), "false"))
+        .build();
   }
 
   /** The endpoint to be used for the channel. */

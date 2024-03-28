@@ -32,6 +32,8 @@ package com.google.api.gax.httpjson;
 import com.google.api.core.InternalExtensionOnly;
 import com.google.api.gax.rpc.TransportChannel;
 import com.google.auto.value.AutoValue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /** Implementation of TransportChannel based on http/json. */
@@ -97,12 +99,14 @@ public abstract class HttpJsonTransportChannel implements TransportChannel {
   }
 
   public static HttpJsonTransportChannel create(ManagedHttpJsonChannel channel) {
-    return newBuilder().setManagedChannel(channel).build();
+    return newBuilder().setManagedChannel(channel).setConfigurations(new HashMap<>()).build();
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setManagedChannel(ManagedHttpJsonChannel value);
+
+    abstract Builder setConfigurations(Map<String, String> configurations);
 
     public abstract HttpJsonTransportChannel build();
   }

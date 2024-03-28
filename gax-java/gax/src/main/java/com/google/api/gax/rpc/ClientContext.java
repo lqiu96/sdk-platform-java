@@ -154,6 +154,8 @@ public abstract class ClientContext {
    * settings.
    */
   public static ClientContext create(StubSettings settings) throws IOException {
+    Map<String, String> clientInitializationOtelAttributes = new HashMap<>();
+
     ApiClock clock = settings.getClock();
 
     ExecutorProvider backgroundExecutorProvider = settings.getBackgroundExecutorProvider();
@@ -224,6 +226,9 @@ public abstract class ClientContext {
       transportChannelProvider = transportChannelProvider.withEndpoint(endpoint);
     }
     TransportChannel transportChannel = transportChannelProvider.getTransportChannel();
+    clientInitializationOtelAttributes.put(
+        "directpath_enabled",
+        String.valueOf(transportChannel.getConfigurations().get("directpath_enabled")));
 
     ApiCallContext defaultCallContext =
         transportChannel.getEmptyCallContext().withTransportChannel(transportChannel);
@@ -261,6 +266,9 @@ public abstract class ClientContext {
       backgroundResources.add(watchdog);
     }
 
+    ApiTracerFactory apiTracerFactory = settings.getTracerFactory();
+    apiTracerFactory.addAttributes(clientInitializationOtelAttributes);
+
     return newBuilder()
         .setBackgroundResources(backgroundResources.build())
         .setExecutor(backgroundExecutor)
@@ -276,7 +284,7 @@ public abstract class ClientContext {
         .setQuotaProjectId(settings.getQuotaProjectId())
         .setStreamWatchdog(watchdog)
         .setStreamWatchdogCheckInterval(settings.getStreamWatchdogCheckInterval())
-        .setTracerFactory(settings.getTracerFactory())
+        .setTracerFactory(apiTracerFactory)
         .build();
   }
 

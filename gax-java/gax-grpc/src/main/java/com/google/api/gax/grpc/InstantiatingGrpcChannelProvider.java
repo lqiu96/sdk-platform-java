@@ -40,6 +40,7 @@ import com.google.api.gax.rpc.TransportChannel;
 import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.api.gax.rpc.internal.EnvironmentProvider;
 import com.google.api.gax.rpc.mtls.MtlsProvider;
+import com.google.api.gax.tracing.ApiTracerFactory;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.ComputeEngineCredentials;
 import com.google.common.annotations.VisibleForTesting;
@@ -239,9 +240,15 @@ public final class InstantiatingGrpcChannelProvider implements TransportChannelP
   }
 
   private TransportChannel createChannel() throws IOException {
-    return GrpcTransportChannel.create(
-        ChannelPool.create(
-            channelPoolSettings, InstantiatingGrpcChannelProvider.this::createSingleChannel));
+    return GrpcTransportChannel.newBuilder()
+        .setManagedChannel(
+            ChannelPool.create(
+                channelPoolSettings, InstantiatingGrpcChannelProvider.this::createSingleChannel))
+        .setConfigurations(
+            ImmutableMap.of(
+                ApiTracerFactory.MetricAttribute.DIRECTPATH_ENABLED.getAttribute(),
+                String.valueOf(isCompatibleForDirectPath())))
+        .build();
   }
 
   private boolean isDirectPathEnabled() {
@@ -370,10 +377,7 @@ public final class InstantiatingGrpcChannelProvider implements TransportChannelP
 
     // Check DirectPath traffic.
     boolean useDirectPathXds = false;
-    if (isDirectPathEnabled()
-        && isCredentialDirectPathCompatible()
-        && isOnComputeEngine()
-        && canUseDirectPathWithUniverseDomain()) {
+    if (isCompatibleForDirectPath()) {
       CallCredentials callCreds = MoreCallCredentials.from(credentials);
       ChannelCredentials channelCreds =
           GoogleDefaultChannelCredentials.newBuilder().callCredentials(callCreds).build();
@@ -444,6 +448,20 @@ public final class InstantiatingGrpcChannelProvider implements TransportChannelP
       channelPrimer.primeChannel(managedChannel);
     }
     return managedChannel;
+  }
+
+  /**
+   * DirectPath must be enabled via the settings and a few other configurations/settings must also
+   * be valid for the request to go through DirectPath (valid credentials, running on Compute, and
+   * routed through Google Servers).
+   *
+   * @return if DirectPath is enabled for the client and is compatible to be used with DirectPath
+   */
+  public boolean isCompatibleForDirectPath() {
+    return isDirectPathEnabled()
+        && isCredentialDirectPathCompatible()
+        && isOnComputeEngine()
+        && canUseDirectPathWithUniverseDomain();
   }
 
   /** The endpoint to be used for the channel. */

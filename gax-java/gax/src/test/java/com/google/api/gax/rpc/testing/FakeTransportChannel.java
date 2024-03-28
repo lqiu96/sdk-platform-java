@@ -31,6 +31,7 @@ package com.google.api.gax.rpc.testing;
 
 import com.google.api.core.InternalApi;
 import com.google.api.gax.rpc.TransportChannel;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +64,11 @@ public class FakeTransportChannel implements TransportChannel {
   @Override
   public FakeCallContext getEmptyCallContext() {
     return FakeCallContext.createDefault();
+  }
+
+  @Override
+  public Map<String, String> getConfigurations() {
+    return ImmutableMap.of();
   }
 
   @Override
