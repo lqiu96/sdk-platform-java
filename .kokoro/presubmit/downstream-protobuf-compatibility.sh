@@ -38,5 +38,5 @@ for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
   # Perform testing on last release, not HEAD
   last_release=$(find_last_release_version "$repo")
   repo_name=$(echo "$repo" | cut -d '-' -f 2)
-  mvn exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="-r --artifacts com.google.cloud:google-cloud-${repo_name}:${last_release}"
+  mvn exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="-r --artifacts com.google.cloud:google-cloud-${repo_name}:${last_release} -e default_exclusions.txt"
 done
