@@ -34,7 +34,6 @@ pushd cloud-opensource-java
 mvn clean compile -T 1C
 pushd dependencies
 
-pushd java-shared-dependencies/target
 for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
   # Perform testing on last release, not HEAD
   last_release=$(find_last_release_version "$repo")
