@@ -31,7 +31,7 @@ setup_maven_mirror
 
 git clone https://github.com/lqiu96/cloud-opensource-java.git
 pushd cloud-opensource-java
-mvn clean compile -T 1C
+mvn -B -ntp clean compile
 pushd dependencies
 
 for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
@@ -39,5 +39,5 @@ for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
   last_release=$(find_last_release_version "$repo")
   repo_name=$(echo "$repo" | cut -d '-' -f 2-)
   cat "$scriptDir/default_exclusions.txt"
-  mvn exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="-r --artifacts com.google.cloud:google-cloud-${repo_name}:${last_release} -e $scriptDir/default_exclusions.txt"
+  mvn -B -ntp exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="-r --artifacts com.google.cloud:google-cloud-${repo_name}:${last_release} -e $scriptDir/default_exclusions.txt"
 done
