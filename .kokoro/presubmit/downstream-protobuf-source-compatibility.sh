@@ -27,7 +27,6 @@ if [ -z "${PROTOBUF_RUNTIME_VERSION}" ]; then
   exit 1
 fi
 
-
 # Get the directory of the build script
 scriptDir=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 cd "${scriptDir}/../.." # cd to the root of this repo
@@ -48,7 +47,6 @@ for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
       -Dclirr.skip=true \
       -Denforcer.skip=true \
       -Dmaven.javadoc.skip=true \
-      -Dgcloud.download.skip=true \
       -Dprotobuf.version=${PROTOBUF_RUNTIME_VERSION} \
       -T 1C
   popd
