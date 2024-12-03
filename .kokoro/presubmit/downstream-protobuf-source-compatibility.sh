@@ -27,10 +27,7 @@ if [ -z "${PROTOBUF_RUNTIME_VERSION}" ]; then
   exit 1
 fi
 
-# Get the directory of the build script
-scriptDir=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 cd "${scriptDir}/../.." # cd to the root of this repo
-source "$scriptDir/common.sh"
 
 setup_maven_mirror
 
