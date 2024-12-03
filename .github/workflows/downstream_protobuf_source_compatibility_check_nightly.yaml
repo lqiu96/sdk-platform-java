@@ -6,6 +6,7 @@ on:
         description: 'Comma separated list of Protobuf-Java versions (i.e. 3.25.5, 4.29.0)'
         default: '"3.25.5","4.28.3"'
         required: false
+  pull_request:
   schedule:
     - cron: '0 1 * * *' # Nightly at 1am
 defaults:
