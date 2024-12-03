@@ -1,7 +1,4 @@
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 1 * * *' # Nightly at 1am
   push:
     branches:
       - main
@@ -15,7 +12,7 @@ on:
 
 name: Downstream Check
 jobs:
-  downstream-protobuf-source-test:
+  downstream-compatibility:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -35,9 +32,25 @@ jobs:
           - java-spanner
           - java-storage
           - java-storage-nio
-        protobuf-version:
-          - 3.25.5
-          - 4.28.3
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+      - run: mvn -version
+      - name: Install xmllint
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libxml2-utils
+      - name: Test helper scripts
+        run: ./.kokoro/presubmit/common_test.sh
+      - name: Perform downstream compatibility testing
+        run: REPOS_UNDER_TEST="${{ matrix.repo }}" ./.kokoro/presubmit/downstream-compatibility.sh
+  downstream-compatibility-spring-generator:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -50,4 +63,4 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install libxml2-utils
       - name: Perform downstream compatibility testing
-        run: REPOS_UNDER_TEST="${{ matrix.repo }}" PROTOBUF_RUNTIME_VERSION="${{ matrix.protobuf-version}}" ./.kokoro/presubmit/downstream-protobuf-source-compatibility.sh
+        run: ./.kokoro/presubmit/downstream-compatibility-spring.sh

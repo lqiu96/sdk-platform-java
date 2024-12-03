@@ -1,0 +1,48 @@
+name: Downstream Source Compatibility Nightly
+on:
+  workflow_dispatch:
+    inputs:
+      protobuf_versions:
+        description: 'Comma separated list of Protobuf-Java versions (i.e. 3.25.5, 4.29.0)'
+        default: '"3.25.5","4.28.3"'
+        required: false
+  schedule:
+    - cron: '0 1 * * *' # Nightly at 1am
+defaults:
+  run:
+    shell: bash
+jobs:
+  downstream-protobuf-source-test:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - google-cloud-java
+          - java-bigtable
+          - java-bigquery
+          - java-bigquerystorage
+          - java-datastore
+          - java-firestore
+          - java-logging
+          - java-logging-logback
+          - java-pubsub
+          - java-pubsublite
+          - java-spanner-jdbc
+          - java-spanner
+          - java-storage
+          - java-storage-nio
+        protobuf-version: ${{ fromJSON(format('[{0}]', inputs.protobuf_versions)) }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+      - run: mvn -version
+      - name: Install xmllint
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libxml2-utils
+      - name: Perform downstream compatibility testing
+        run: REPOS_UNDER_TEST="${{ matrix.repo }}" PROTOBUF_RUNTIME_VERSION="${{ matrix.protobuf-version}}" ./.kokoro/presubmit/downstream-protobuf-source-compatibility.sh
