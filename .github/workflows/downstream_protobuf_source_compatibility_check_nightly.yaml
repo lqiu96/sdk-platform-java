@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       protobuf_versions:
-        description: 'Comma separated list of Protobuf-Java versions (i.e. 3.25.5, 4.29.0)'
-        default: '["3.25.5","4.28.3"]'
+        description: 'Comma separated list of Protobuf-Java versions (i.e. 3.25.5, 4.28.3)'
+        default: '"3.25.5","4.28.3"'
         required: false
   pull_request:
   schedule:
@@ -34,7 +34,11 @@ jobs:
           - java-spanner
           - java-storage
           - java-storage-nio
-        protobuf-version: ${{ fromJSON(github.event.inputs.protobuf_versions) }}
+        # Specify the Protobuf versions here as well because the default values above are only supplied from
+        # workflow_dispatch flow. The nightly workflow doesn't have a default input otherwise. The default
+        # values above provide an example of the expected format in the UI. When updating, update both sections
+        # to provide a proper default.
+        protobuf-version: ${{ fromJSON(format('[{0}]', inputs.protobuf_versions || '"3.25.5","4.28.3"')) }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
