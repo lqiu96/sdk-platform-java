@@ -6,7 +6,7 @@ on:
     inputs:
       protobuf_versions:
         description: 'Comma separated list of Protobuf-Java versions (i.e. 3.25.5, 4.29.0)'
-        default: '"3.25.5","4.28.3"'
+        default: '["3.25.5","4.28.3"]'
         required: false
   pull_request:
   schedule:
@@ -34,7 +34,7 @@ jobs:
           - java-spanner
           - java-storage
           - java-storage-nio
-        protobuf-version: ${{ fromJSON(format('[{0}]', inputs.protobuf_versions)) }}
+        protobuf-version: ${{ fromJSON(github.event.inputs.protobuf_versions) }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
