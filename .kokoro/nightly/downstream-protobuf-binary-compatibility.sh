@@ -43,24 +43,16 @@ for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
 
   # Match all artifacts that start with google-cloud (rules out proto and grpc modules)
   # Exclude any matches to BOM artifacts or emulators
-  ARTIFACT_LIST=$(cat "versions.txt" | grep "^google-cloud" | grep -vE "(bom|emulator)" | tr '\n' ',')
+  ARTIFACT_LIST=$(cat "versions.txt" | grep "^google-cloud" | grep -vE "(bom|emulator|google-cloud-java)" | awk -F: '{$1="com.google.cloud:"$1; $2=""; print}' OFS=: | sed 's/::/:/' | tr '\n' ',')
   ARTIFACT_LIST=${ARTIFACT_LIST%,}
 
   echo "Found artifacts ${ARTIFACT_LIST}"
   popd
 
-  for artifact in ${ARTIFACT_LIST//,/ }; do
-    artifact_id=$(echo "${artifact}" | tr ':' '\n' | head -n 1)
-    version=$(echo "${artifact}" | tr ':' '\n' | tail -n 1)
-
-    maven_coordinates="com.google.cloud:${artifact_id}:${version}"
-    echo "Using ${maven_coordinates}"
-
-    # The `-s` argument filters the linkage check problems that stem from the artifact
-    program_args="-r --artifacts ${maven_coordinates},com.google.protobuf:protobuf-java:${PROTOBUF_RUNTIME_VERSION},com.google.protobuf:protobuf-java-util:${PROTOBUF_RUNTIME_VERSION} -s ${maven_coordinates}"
-    echo "Linkage Checker Program Arguments: ${program_args}"
-    mvn -B -ntp exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="${program_args}"
-  done
+  # The `-s` argument filters the linkage check problems that stem from the artifact
+  program_args="-r --artifacts ${ARTIFACT_LIST},com.google.protobuf:protobuf-java:${PROTOBUF_RUNTIME_VERSION},com.google.protobuf:protobuf-java-util:${PROTOBUF_RUNTIME_VERSION} -s ${maven_coordinates}"
+  echo "Linkage Checker Program Arguments: ${program_args}"
+  mvn -B -ntp exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="${program_args}"
 done
 popd
 popd
