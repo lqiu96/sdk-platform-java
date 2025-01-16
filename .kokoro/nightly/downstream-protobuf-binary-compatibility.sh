@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,17 +29,30 @@ if [ -z "${PROTOBUF_RUNTIME_VERSION}" ]; then
   exit 1
 fi
 
+git clone https://github.com/lqiu96/cloud-opensource-java.git
+pushd cloud-opensource-java
+git checkout source-filter
+mvn -B -ntp clean compile
+pushd dependencies
+
 for repo in ${REPOS_UNDER_TEST//,/ }; do # Split on comma
   # Perform source-compatibility testing on main (latest changes)
   git clone "https://github.com/googleapis/$repo.git" --depth=1
   pushd "$repo"
+  mvn -B -ntp clean install -T 1C -DskipTests -Dclirr.skip
 
-  # Compile the Handwritten Library with the Protobuf-Java version to test source compatibility
-  mvn clean compile -B -V -ntp \
-      -Dclirr.skip=true \
-      -Denforcer.skip=true \
-      -Dmaven.javadoc.skip=true \
-      -Dprotobuf.version=${PROTOBUF_RUNTIME_VERSION} \
-      -T 1C
+  # Match all artifacts that start with google-cloud (rules out proto and grpc modules)
+  # Exclude any matches to BOM artifacts or emulators
+  ARTIFACT_LIST=$(cat "versions.txt" | grep "^google-cloud" | grep -vE "(bom|emulator|google-cloud-java)" | awk -F: '{$1="com.google.cloud:"$1; $2=""; print}' OFS=: | sed 's/::/:/' | tr '\n' ',')
+  ARTIFACT_LIST=${ARTIFACT_LIST%,}
+
+  echo "Found artifacts ${ARTIFACT_LIST}"
   popd
+
+  # The `-s` argument filters the linkage check problems that stem from the artifact
+  program_args="-r --artifacts ${ARTIFACT_LIST},com.google.protobuf:protobuf-java:${PROTOBUF_RUNTIME_VERSION},com.google.protobuf:protobuf-java-util:${PROTOBUF_RUNTIME_VERSION} -s ${ARTIFACT_LIST}"
+  echo "Linkage Checker Program Arguments: ${program_args}"
+  mvn -B -ntp exec:java -Dexec.mainClass="com.google.cloud.tools.opensource.classpath.LinkageCheckerMain" -Dexec.args="${program_args}"
 done
+popd
+popd
