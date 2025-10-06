@@ -18,7 +18,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+      - name: Setup Git
+        run: |
+          git config user.name 'Lawrence Qiu'
+          git config user.email 'lawrenceqiu@google.com'
 
       # The GH_TOKEN is set automatically using GitHub's built-in secret.
       # The `gh` CLI tool will automatically use this token for authentication.
