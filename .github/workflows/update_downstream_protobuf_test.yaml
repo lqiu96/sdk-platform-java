@@ -24,5 +24,5 @@ jobs:
       # The `gh` CLI tool will automatically use this token for authentication.
       - name: Run PR status check script
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN }}
         run: ./.github/scripts/update_prs.sh
