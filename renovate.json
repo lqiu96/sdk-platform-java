@@ -12,6 +12,12 @@
   "customManagers": [
     {
       "customType": "regex",
+      "managerFilePatterns": ["/^dependencies\\.txt$/"],
+      "matchStrings": ["(?<depName>.*),(.*)=(?<currentValue>.*)"],
+      "datasourceTemplate": "maven"
+    },
+    {
+      "customType": "regex",
       "fileMatch": [
         "^gax-java/dependencies\\.properties$"
       ],
@@ -82,6 +88,15 @@
     }
   ],
   "packageRules": [
+    {
+      "matchManagers": [
+        "regex"
+      ],
+      "fileMatch": ["/^dependencies\\.txt$/"],
+      "matchDatasources": ["maven"],
+      "groupName": "Upper Bound Dependencies File",
+      "description": "Group all dependencies from the Upper Bound Dependencies File"
+    },
     {
       "matchPackageNames": [
         "com.google.cloud:google-cloud-shared-config"
