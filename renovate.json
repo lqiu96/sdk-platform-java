@@ -203,8 +203,15 @@
     },
     {
       "enabled": false,
-      "matchFileNames": ["**/pom.xml"],
-      "description": "Disable all Dependency PRs from pom.xml"
+      "matchFileNames": ["**/pom.xml", "gax-java/dependencies.properties"],
+      "description": "Disable all Java Dependency PRs"
+    },
+    {
+      "matchFileNames": ["hermetic_build/library_generation/requirements.txt"],
+      "groupName": "Hermetic Build Library Generation",
+      "matchPackageNames": [
+        "*"
+      ]
     },
     {
       "matchManagers": [
