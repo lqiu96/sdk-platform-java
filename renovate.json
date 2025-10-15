@@ -113,26 +113,23 @@
       ]
     },
     {
-      "matchPackageNames": [
-        "com.google.cloud:google-cloud-shared-config"
-      ],
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2/",
-        "https://repo1.maven.org/maven2"
-      ]
+      "enabled": false,
+      "matchFileNames": ["**/pom.xml", "gax-java/dependencies.properties"],
+      "description": "Disable all Java Dependency PRs"
     },
     {
+      "enabled": true,
       "semanticCommitType": "build",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
         "/^org.apache.maven/",
         "/^org.jacoco:/",
         "/^org.codehaus.mojo:/",
-        "/^org.sonatype.plugins:/",
-        "/^com.google.cloud:google-cloud-shared-config/"
+        "/^org.sonatype.plugins:/"
       ]
     },
     {
+      "enabled": true,
       "semanticCommitType": "chore",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -142,6 +139,7 @@
       ]
     },
     {
+      "enabled": true,
       "semanticCommitType": "test",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -153,18 +151,21 @@
       ]
     },
     {
-      "groupName": "Jackson Dependencies",
+      "enabled": true,
+      "groupName": "Google Java Shared Configs",
       "matchPackageNames": [
-        "/^com.fasterxml.jackson.core/"
+        "/^com.google.cloud:google-cloud-shared-config/"
       ]
     },
     {
+      "enabled": true,
       "groupName": "Google Auth Library dependencies",
       "matchPackageNames": [
         "/^com.google.auth/"
       ]
     },
     {
+      "enabled": true,
       "groupName": "Google API dependencies",
       "matchPackageNames": [
         "/com.google.api.grpc:grpc-google-common-protos/",
@@ -175,27 +176,11 @@
       ]
     },
     {
+      "enabled": true,
       "groupName": "Google HTTP Client dependencies",
       "matchPackageNames": [
         "/^com.google.http-client/"
       ]
-    },
-    {
-      "groupName": "Netty dependencies",
-      "matchPackageNames": [
-        "/^io.netty/"
-      ]
-    },
-    {
-      "groupName": "Error Prone dependencies",
-      "matchPackageNames": [
-        "/^com.google.errorprone/"
-      ]
-    },
-    {
-      "enabled": false,
-      "matchFileNames": ["**/pom.xml", "gax-java/dependencies.properties"],
-      "description": "Disable all Java Dependency PRs"
     },
     {
       "matchFileNames": ["hermetic_build/**"],
