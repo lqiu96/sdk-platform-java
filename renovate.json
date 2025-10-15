@@ -113,15 +113,6 @@
       ]
     },
     {
-      "enabled": false,
-      "matchPackageNames": [
-        "/^com.google.protobuf:/",
-        "/^com.google.guava:/",
-        "/^io.grpc/"
-      ],
-      "description": "Disabled automatic version bumps"
-    },
-    {
       "matchPackageNames": [
         "com.google.cloud:google-cloud-shared-config"
       ],
@@ -207,8 +198,8 @@
       "description": "Disable all Java Dependency PRs"
     },
     {
-      "matchFileNames": ["hermetic_build/library_generation/requirements.txt"],
-      "groupName": "Hermetic Build Library Generation",
+      "matchFileNames": ["hermetic_build/**"],
+      "groupName": "Hermetic Build Library Generation Dependencies",
       "matchPackageNames": [
         "*"
       ]
