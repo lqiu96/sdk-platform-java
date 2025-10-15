@@ -205,6 +205,20 @@
       ]
     },
     {
+      "matchFileNames": [
+        ".cloudbuild/library_generation/**"
+      ],
+      "groupName": "Cloud Build Library Generation Dependencies"
+    },
+    {
+      "enabled": false,
+      "fileMatch": [
+        "^\\.cloudbuild/library_generation/library_generation.*\\.Dockerfile$"
+      ],
+      "matchPackageNames": ["/^io.grpc:grpc-core/"],
+      "datasourceTemplate": "maven"
+    },
+    {
       "matchManagers": [
         "regex"
       ],
