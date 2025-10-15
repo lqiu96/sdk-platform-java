@@ -89,6 +89,39 @@
   ],
   "packageRules": [
     {
+      "enabled": false,
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "*"
+      ],
+      "description": "Disable all major version bumps"
+    },
+    {
+      "semanticCommitType": "deps",
+      "semanticCommitScope": null,
+      "matchPackageNames": [
+        "*"
+      ],
+      "description": "Prefix version bumps with `deps:` Conventional Commit"
+    },
+    {
+      "ignoreUnstable": false,
+      "matchPackageNames": [
+        "/^com.google.cloud:google-cloud-/"
+      ]
+    },
+    {
+      "enabled": false,
+      "matchPackageNames": [
+        "/^com.google.protobuf:/",
+        "/^com.google.guava:/",
+        "/^io.grpc/"
+      ],
+      "description": "Disabled automatic version bumps"
+    },
+    {
       "matchPackageNames": [
         "com.google.cloud:google-cloud-shared-config"
       ],
@@ -98,38 +131,8 @@
       ]
     },
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "enabled": false,
-      "matchPackageNames": [
-        "*"
-      ]
-    },
-    {
-      "enabled": false,
-      "matchPackageNames": [
-        "/^com.google.protobuf:/"
-      ]
-    },
-    {
-      "versioning": "docker",
-      "matchPackageNames": [
-        "/^com.google.guava:/"
-      ],
-      "enabled": false
-    },
-    {
-      "semanticCommitType": "deps",
-      "semanticCommitScope": null,
-      "matchPackageNames": [
-        "*"
-      ]
-    },
-    {
       "semanticCommitType": "build",
       "semanticCommitScope": "deps",
-      "enabled": true,
       "matchPackageNames": [
         "/^org.apache.maven/",
         "/^org.jacoco:/",
@@ -159,23 +162,10 @@
       ]
     },
     {
-      "ignoreUnstable": false,
-      "matchPackageNames": [
-        "/^com.google.cloud:google-cloud-/"
-      ]
-    },
-    {
-      "groupName": "jackson dependencies",
+      "groupName": "Jackson Dependencies",
       "matchPackageNames": [
         "/^com.fasterxml.jackson.core/"
       ]
-    },
-    {
-      "groupName": "gRPC dependencies",
-      "matchPackageNames": [
-        "/^io.grpc/"
-      ],
-      "enabled": false
     },
     {
       "groupName": "Google Auth Library dependencies",
@@ -200,12 +190,6 @@
       ]
     },
     {
-      "groupName": "OpenCensus dependencies",
-      "matchPackageNames": [
-        "/^io.opencensus/"
-      ]
-    },
-    {
       "groupName": "Netty dependencies",
       "matchPackageNames": [
         "/^io.netty/"
@@ -218,13 +202,19 @@
       ]
     },
     {
+      "enabled": false,
+      "matchFileNames": ["**/pom.xml"],
+      "description": "Disable all Dependency PRs from pom.xml"
+    },
+    {
       "matchManagers": [
         "regex"
       ],
+      "semanticCommitType": "chore",
       "matchFileNames": ["dependencies.txt"],
       "matchDatasources": ["maven"],
       "groupName": "Upper Bound Dependencies File",
-      "description": "Group all dependencies from the Upper Bound Dependencies File"
+      "description": "Dependencies from the Upper Bound Dependencies File"
     }
   ]
 }
