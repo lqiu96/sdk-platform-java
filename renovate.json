@@ -119,6 +119,7 @@
     },
     {
       "enabled": true,
+      "groupName": "Maven build plugins",
       "semanticCommitType": "build",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -140,6 +141,7 @@
     },
     {
       "enabled": true,
+      "groupName": "Test dependencies",
       "semanticCommitType": "test",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
