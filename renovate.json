@@ -207,8 +207,10 @@
       "matchManagers": [
         "regex"
       ],
+      "matchUpdateTypes":  ["major", "minor", "patch"],
       "semanticCommitType": "chore",
       "matchFileNames": ["dependencies.txt"],
+      "matchPackageNames": ["*"],
       "matchDatasources": ["maven"],
       "groupName": "Upper Bound Dependencies File",
       "description": "Dependencies from the Upper Bound Dependencies File"
