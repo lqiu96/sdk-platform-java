@@ -119,6 +119,7 @@
     },
     {
       "enabled": true,
+      "groupName": "Maven build plugins",
       "semanticCommitType": "build",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -140,6 +141,7 @@
     },
     {
       "enabled": true,
+      "groupName": "Test dependencies",
       "semanticCommitType": "test",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -207,8 +209,10 @@
       "matchManagers": [
         "regex"
       ],
+      "matchUpdateTypes":  ["major", "minor", "patch"],
       "semanticCommitType": "chore",
       "matchFileNames": ["dependencies.txt"],
+      "matchPackageNames": ["*"],
       "matchDatasources": ["maven"],
       "groupName": "Upper Bound Dependencies File",
       "description": "Dependencies from the Upper Bound Dependencies File"
