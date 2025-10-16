@@ -109,7 +109,6 @@
     },
     {
       "enabled": true,
-      "groupName": "Maven build plugins",
       "semanticCommitType": "build",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -131,7 +130,6 @@
     },
     {
       "enabled": true,
-      "groupName": "Test dependencies",
       "semanticCommitType": "test",
       "semanticCommitScope": "deps",
       "matchPackageNames": [
@@ -143,21 +141,18 @@
       ]
     },
     {
-      "enabled": true,
-      "groupName": "Google Java Shared Configs",
+      "groupName": "Google Java Shared Config",
       "matchPackageNames": [
         "/^com.google.cloud:google-cloud-shared-config/"
       ]
     },
     {
-      "enabled": true,
       "groupName": "Google Auth Library dependencies",
       "matchPackageNames": [
         "/^com.google.auth/"
       ]
     },
     {
-      "enabled": true,
       "groupName": "Google API dependencies",
       "matchPackageNames": [
         "/com.google.api.grpc:grpc-google-common-protos/",
@@ -168,7 +163,6 @@
       ]
     },
     {
-      "enabled": true,
       "groupName": "Google HTTP Client dependencies",
       "matchPackageNames": [
         "/^com.google.http-client/"
@@ -204,6 +198,7 @@
       "description": "Disable all major version bumps everywhere"
     },
     {
+      "enabled": true,
       "matchManagers": [
         "regex"
       ],
