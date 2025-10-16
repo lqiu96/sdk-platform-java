@@ -11,7 +11,7 @@
 javax.annotation:javax.annotation-api,javax.annotation-api=1.3.2
 io.grpc:grpc-bom,grpc=1.74.0
 com.google.auth:google-auth-library-bom,google.auth=1.40.0
-com.google.http-client:google-http-client,google.http-client=1.47.1
+com.google.http-client:google-http-client,google.http-client=2.0.2
 com.google.code.gson:gson,gson=2.13.2
 com.google.guava:guava,guava=33.4.8-jre
 com.google.protobuf:protobuf-java,protobuf=4.31.1
