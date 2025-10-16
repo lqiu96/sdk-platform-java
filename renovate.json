@@ -90,13 +90,8 @@
   "packageRules": [
     {
       "enabled": false,
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "matchPackageNames": [
-        "*"
-      ],
-      "description": "Disable all major version bumps"
+      "matchFileNames": ["**/pom.xml", "gax-java/dependencies.properties"],
+      "description": "Disable all Java dependency bumps"
     },
     {
       "semanticCommitType": "deps",
@@ -111,11 +106,6 @@
       "matchPackageNames": [
         "/^com.google.cloud:google-cloud-/"
       ]
-    },
-    {
-      "enabled": false,
-      "matchFileNames": ["**/pom.xml", "gax-java/dependencies.properties"],
-      "description": "Disable all Java Dependency PRs"
     },
     {
       "enabled": true,
@@ -187,9 +177,7 @@
     {
       "matchFileNames": ["hermetic_build/**"],
       "groupName": "Hermetic Build Library Generation Dependencies",
-      "matchPackageNames": [
-        "*"
-      ]
+      "matchPackageNames": ["*"]
     },
     {
       "matchFileNames": [
@@ -204,6 +192,16 @@
       ],
       "matchPackageNames": ["/^io.grpc:grpc-core/"],
       "datasourceTemplate": "maven"
+    },
+    {
+      "enabled": false,
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "*"
+      ],
+      "description": "Disable all major version bumps everywhere"
     },
     {
       "matchManagers": [
