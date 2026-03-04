@@ -9,11 +9,7 @@
 PULL_REQUESTS=(
     "https://github.com/googleapis/java-bigtable/pull/2663"
     "https://github.com/googleapis/java-bigquery/pull/3942"
-    "https://github.com/googleapis/java-bigquerystorage/pull/3083"
-    "https://github.com/googleapis/java-datastore/pull/1954"
     "https://github.com/googleapis/java-firestore/pull/2227"
-    "https://github.com/googleapis/java-logging/pull/1851"
-    "https://github.com/googleapis/java-logging-logback/pull/1512"
     "https://github.com/googleapis/java-pubsub/pull/2537"
     "https://github.com/googleapis/java-pubsublite/pull/1917"
     "https://github.com/googleapis/java-spanner/pull/4026"
